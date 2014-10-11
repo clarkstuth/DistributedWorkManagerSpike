@@ -10,14 +10,14 @@ namespace WorkManager.Tests
     {
         IntegerWorkManager Manager { get; set; }
         OperationContext Context { get; set; }
-        ICommunicationObject CommunicationObject { get; set; }
+        FakeCommunicationObject CommunicationObject { get; set; }
         IWorker WorkerCallback { get; set; }
 
         [TestInitialize]
         public void SetUp()
         {
             Context = Mock.Create<OperationContext>();
-            CommunicationObject = Mock.Create<ICommunicationObject>();
+            CommunicationObject = new FakeCommunicationObject();
             WorkerCallback = Mock.Create<IWorker>();
 
             Mock.Arrange(() => Context.GetCallbackChannel<ICommunicationObject>()).Returns(CommunicationObject);
@@ -49,7 +49,21 @@ namespace WorkManager.Tests
             Assert.AreEqual(expectedCount, workerCount);
         }
 
+        [TestMethod]
+        public void StartWorkingShouldBindInternalCallbacksToChannelClosedEvent()
+        {
+            Manager.StartWorking();
 
+            Assert.IsTrue(CommunicationObject.IsEventHandlerClosedSet());
+        }
+
+        [TestMethod]
+        public void StartWorkingShouldBindInternalCallbacksToChannelClosingEvent()
+        {
+            Manager.StartWorking();
+
+            Assert.IsTrue(CommunicationObject.IsEventHandlerClosingSet());
+        }
 
     }
 }
