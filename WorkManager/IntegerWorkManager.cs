@@ -27,7 +27,7 @@ namespace WorkManager
         {
             var communicationObject = GetCallbackChannel();
             communicationObject.Closed += EventServiceClosed;
-            communicationObject.Closing += EventServiceClosed;
+            communicationObject.Closing += EventServiceClosing;
         }
         
         public override void StopWorking()
@@ -48,17 +48,29 @@ namespace WorkManager
             Workers.Remove(callbackObject);
         }
 
-        public override void WorkComplete(string workItemGuid)
+        public override void WorkComplete(int workItemGuid)
         {
             throw new NotImplementedException();
         }
 
         void EventServiceClosing(object sender, EventArgs e)
         {
+            HandleDisconnectEvent(sender, e);
         }
 
         void EventServiceClosed(object sender, EventArgs e)
         {
+            HandleDisconnectEvent(sender, e);
         }
+
+        private void HandleDisconnectEvent(object sender, EventArgs e)
+        {
+            var callback = (IWorker) sender;
+            if (callback != null && Workers.Contains(callback))
+            {
+                Workers.Remove(callback);
+            }
+        }
+
     }
 }

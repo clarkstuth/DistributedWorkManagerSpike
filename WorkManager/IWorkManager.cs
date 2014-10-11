@@ -13,7 +13,7 @@ namespace WorkManager
         void StopWorking();
 
         [OperationContract(IsOneWay = true)]
-        void WorkComplete(string workItemGuid);
+        void WorkComplete(int workItemGuid);
 
     }
 }

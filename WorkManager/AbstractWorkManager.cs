@@ -8,7 +8,7 @@ namespace WorkManager
     {
         public abstract void StartWorking();
         public abstract void StopWorking();
-        public abstract void WorkComplete(string workItemGuid);
+        public abstract void WorkComplete(int workItemGuid);
 
         protected OperationContext _operationContext { get; set; }
 

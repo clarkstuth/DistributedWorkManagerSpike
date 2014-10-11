@@ -2,10 +2,9 @@
 
 namespace WorkManager.DataContracts
 {
-    
     public interface IWorker
     {
         [OperationContract(IsOneWay = true)]
-        void DoWork();
+        void DoWork(int number);
     }
 }
