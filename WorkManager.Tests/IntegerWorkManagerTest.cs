@@ -41,12 +41,9 @@ namespace WorkManager.Tests
         [TestMethod]
         public void StartWorkingShouldAddConnectedClientToPoolOfAvailableClients()
         {
-            var expectedCount = 1;
-
             Manager.StartWorking();
 
-            var workerCount = Manager.GetWorkers().Count;
-            Assert.AreEqual(expectedCount, workerCount);
+            CollectionAssert.Contains(Manager.GetWorkers(), WorkerCallback);
         }
 
         [TestMethod]
@@ -63,6 +60,15 @@ namespace WorkManager.Tests
             Manager.StartWorking();
 
             Assert.IsTrue(CommunicationObject.IsEventHandlerClosingSet());
+        }
+
+        [TestMethod]
+        public void StopWorkingShouldRemoveCurrentWorkerFromAvailableWorkers()
+        {
+            Manager.StartWorking();
+            Manager.StopWorking();
+
+            CollectionAssert.DoesNotContain(Manager.GetWorkers(), WorkerCallback);
         }
 
     }

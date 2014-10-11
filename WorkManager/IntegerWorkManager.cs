@@ -19,14 +19,8 @@ namespace WorkManager
         /// </summary>
         public override void StartWorking()
         {
-            AddWorkerToCollection();
+            AddCurrentWorkerToCollection();
             BindToCommunicationObjectCallbacks();
-        }
-
-        private void AddWorkerToCollection()
-        {
-            var callbackObject = GetWorkerCallback();
-            Workers.Add(callbackObject);
         }
 
         private void BindToCommunicationObjectCallbacks()
@@ -38,7 +32,20 @@ namespace WorkManager
         
         public override void StopWorking()
         {
-            throw new NotImplementedException();
+            RemoveCurrentWorkerFromCollection();
+        }
+
+        private void AddCurrentWorkerToCollection()
+        {
+            var callbackObject = GetWorkerCallback();
+            Workers.Add(callbackObject);
+        }
+
+
+        public void RemoveCurrentWorkerFromCollection()
+        {
+            var callbackObject = GetWorkerCallback();
+            Workers.Remove(callbackObject);
         }
 
         public override void WorkComplete(string workItemGuid)
