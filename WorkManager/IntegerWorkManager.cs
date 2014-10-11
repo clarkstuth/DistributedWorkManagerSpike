@@ -6,16 +6,8 @@ namespace WorkManager
 {
     public class IntegerWorkManager : AbstractWorkManager
     {
-        public static List<IWorker> Workers { get; private set; }
-
-        public IntegerWorkManager()
-        {
-            if (Workers == null)
-            {
-                Workers = new List<IWorker>();
-            }
-        }
-
+        public readonly static List<IWorker> Workers = new List<IWorker>();
+        
         public List<IWorker> GetWorkers()
         {
             return Workers;
@@ -23,7 +15,8 @@ namespace WorkManager
 
         public override void StartWorking()
         {
-            
+            var callbackObject = GetWorkerCallback();
+            Workers.Add(callbackObject);
         }
 
         public override void StopWorking()

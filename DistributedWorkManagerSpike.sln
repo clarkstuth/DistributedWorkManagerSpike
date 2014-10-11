@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManager", "WorkManager\WorkManager.csproj", "{90777860-6679-445C-B932-47C3E4E1627A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManager.Tests", "WorkManager.Tests\WorkManager.Tests.csproj", "{AD9604D2-940A-4AE3-8B87-128CBA25193C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManager.TestsOld", "WorkManager.Tests\WorkManager.TestsOld.csproj", "{AD9604D2-940A-4AE3-8B87-128CBA25193C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

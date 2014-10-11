@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.ServiceModel;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace WorkManager.Tests
 {
@@ -6,10 +7,13 @@ namespace WorkManager.Tests
     public class IntegerWorkManagerTest
     {
         IntegerWorkManager Manager { get; set; }
+        OperationContext Context { get; set; }
+
 
         [TestInitialize]
         public void SetUp()
         {
+            Context = Mock.
             Manager = new IntegerWorkManager();
         }
 
