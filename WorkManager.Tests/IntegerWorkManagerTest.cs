@@ -39,6 +39,7 @@ namespace WorkManager.Tests
 
             EmptyAvailableCallbacksObject();
             IntegerWorkManager.AvailableWork.Clear();
+            IntegerWorkManager.ActiveWork.Clear();
             Mock.Reset();
         }
 
@@ -161,6 +162,29 @@ namespace WorkManager.Tests
                 Assert.AreEqual(expectedError, e.Message);
                 throw;
             }
+        }
+
+        [TestMethod]
+        public void CallbackClosedEventShouldSetCallbackActiveToFalse()
+        {
+            Manager.StartWorking();
+
+            CommunicationObject.TriggerClosedEvent(WorkerCallback);
+
+            Assert.IsFalse(WorkerCallback.Active);
+        }
+
+        [TestMethod]
+        public void CallbackClosedEventShouldPutWorkBackIntoAvailableWorkIfWorkWasActive()
+        {
+            Manager.StartWorking();
+            var guid = Guid.NewGuid();
+            var work = 2;
+            var workItem = new WorkItem(guid, work);
+            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
+
+            CommunicationObject.TriggerClosedEvent(WorkerCallback);
+
         }
 
     }

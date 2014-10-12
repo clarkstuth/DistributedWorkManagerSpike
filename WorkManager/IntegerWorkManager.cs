@@ -9,6 +9,8 @@ namespace WorkManager
     {
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
         
+        public readonly static ConcurrentDictionary<Guid, int> AllWork = new ConcurrentDictionary<Guid, int>(); 
+
         public readonly static ConcurrentDictionary<Guid, int> AvailableWork = new ConcurrentDictionary<Guid, int>();
 
         public readonly static ConcurrentDictionary<Guid, IWorker> ActiveWork = new ConcurrentDictionary<Guid, IWorker>();
@@ -49,21 +51,27 @@ namespace WorkManager
         /// <param name="workItem"></param>
         public override void WorkComplete(WorkItem workItem)
         {
-            if (!ActiveWork.ContainsKey(workItem.WorkGuid))
-            {
-                var message = String.Format("Provided Work GUID does not exist: {0}", workItem.WorkGuid);
-                throw new InvalidWorkItemException(message);
-            }
+            GenerateExceptionIfGuidDoesNotExist(workItem.WorkGuid);
 
             IWorker assignedClient;
             ActiveWork.TryRemove(workItem.WorkGuid, out assignedClient);
 
             var workerCallback = GetCurrentWorkerCallback();
             workerCallback.IsWorking = false;
+
             if (workerCallback != assignedClient)
             {
                 var message = String.Format("Work Guid: '{0}' not assigned to reporting callback.", workItem.WorkGuid);
                 throw new WorkNotAssignedException(message);
+            }
+        }
+
+        private static void GenerateExceptionIfGuidDoesNotExist(Guid guid)
+        {
+            if (!ActiveWork.ContainsKey(guid))
+            {
+                var message = String.Format("Provided Work GUID does not exist: {0}", guid);
+                throw new InvalidWorkItemException(message);
             }
         }
 
@@ -77,10 +85,10 @@ namespace WorkManager
             HandleDisconnectEvent(sender, e);
         }
 
-        private void HandleDisconnectEvent(object sender, EventArgs e)
+        private static void HandleDisconnectEvent(object sender, EventArgs e)
         {
             var callback = (IWorker) sender;
-            
+            callback.Active = false;
         }
 
     }
