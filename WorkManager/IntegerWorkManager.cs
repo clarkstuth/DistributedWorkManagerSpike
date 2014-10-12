@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using WorkManager.DataContracts;
-using WorkManager.Exceptions;
 
 namespace WorkManager
 {
@@ -29,8 +28,16 @@ namespace WorkManager
         private void BindToCommunicationObjectCallbacks()
         {
             var communicationObject = GetCallbackChannel();
-            communicationObject.Closed += EventServiceClosed;
-            communicationObject.Closing += EventServiceClosing;
+            communicationObject.Closed += HandleDisconnectEvent;
+            communicationObject.Closing += HandleDisconnectEvent;
+        }
+
+        private static void HandleDisconnectEvent(object sender, EventArgs e)
+        {
+            var callback = (IWorker)sender;
+            callback.Active = false;
+
+            PutAssignedWorkBackIntoAvailableCollection(callback);
         }
 
         /// <summary>
@@ -62,24 +69,6 @@ namespace WorkManager
             workerCallback.IsWorking = false;
         }
 
-        private static void EventServiceClosing(object sender, EventArgs e)
-        {
-            HandleDisconnectEvent(sender, e);
-        }
-
-        private static void EventServiceClosed(object sender, EventArgs e)
-        {
-            HandleDisconnectEvent(sender, e);
-        }
-
-        private static void HandleDisconnectEvent(object sender, EventArgs e)
-        {
-            var callback = (IWorker) sender;
-            callback.Active = false;
-
-            PutAssignedWorkBackIntoAvailableCollection(callback);
-        }
-
         private static void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)
         {
             if (callback.IsWorking && AssignedWork.ContainsKey(callback))
@@ -88,7 +77,6 @@ namespace WorkManager
                 AssignedWork.TryRemove(callback, out assignedGuid);
 
                 UnassignedWork.GetOrAdd(assignedGuid, AllWork[assignedGuid]);
-                
             }
             callback.IsWorking = false;
         }

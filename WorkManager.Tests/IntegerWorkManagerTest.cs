@@ -3,12 +3,11 @@ using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
 using WorkManager.DataContracts;
-using WorkManager.Exceptions;
 
 namespace WorkManager.Tests
 {
     [TestClass]
-    public class IntegerWorkManagerTest
+    public class IntegerWorkManagerTest : AbstractIntegerServiceAwareTestCase
     {
         IntegerWorkManager Manager { get; set; }
         OperationContext Context { get; set; }
@@ -18,6 +17,7 @@ namespace WorkManager.Tests
         [TestInitialize]
         public void SetUp()
         {
+            base.SetUp();
             Context = Mock.Create<OperationContext>();
             CommunicationObject = new FakeCommunicationObject();
             WorkerCallback = Mock.Create<IWorker>();
@@ -36,19 +36,7 @@ namespace WorkManager.Tests
             WorkerCallback = null;
             CommunicationObject = null;
             Context = null;
-
-            EmptyAvailableCallbacksObject();
-            IntegerWorkManager.UnassignedWork.Clear();
-            IntegerWorkManager.AssignedWork.Clear();
-            Mock.Reset();
-        }
-
-        private void EmptyAvailableCallbacksObject()
-        {
-            while (IntegerWorkManager.AvailableCallbacks.Count > 0)
-            {
-                IntegerWorkManager.AvailableCallbacks.Take();
-            }
+            base.TearDown();
         }
 
         [TestMethod]
