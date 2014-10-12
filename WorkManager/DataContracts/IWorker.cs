@@ -5,6 +5,9 @@ namespace WorkManager.DataContracts
     public interface IWorker
     {
         [OperationContract(IsOneWay = true)]
-        void DoWork(int number);
+        void DoWork(WorkItem workItem);
+
+        bool Active { get; set; }
+        bool IsWorking { get; set; }
     }
 }

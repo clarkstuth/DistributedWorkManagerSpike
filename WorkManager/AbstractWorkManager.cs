@@ -8,7 +8,7 @@ namespace WorkManager
     {
         public abstract void StartWorking();
         public abstract void StopWorking();
-        public abstract void WorkComplete(int workItemGuid);
+        public abstract void WorkComplete(WorkItem workItem);
 
         protected OperationContext _operationContext { get; set; }
 
@@ -33,7 +33,7 @@ namespace WorkManager
             return communicationObject;
         }
 
-        protected IWorker GetWorkerCallback()
+        protected IWorker GetCurrentWorkerCallback()
         {
             var operationContext = GetOperationContext();
             var workerCallback = operationContext.GetCallbackChannel<IWorker>();

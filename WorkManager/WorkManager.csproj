@@ -49,8 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractWorkManager.cs" />
-    <Compile Include="Callbacks\CallbackContainer.cs" />
     <Compile Include="DataContracts\IWorker.cs" />
+    <Compile Include="DataContracts\WorkItem.cs" />
+    <Compile Include="Factories\WebServiceFactory.cs" />
     <Compile Include="IntegerWorkManager.cs" />
     <Compile Include="IWorkManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

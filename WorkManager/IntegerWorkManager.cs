@@ -1,25 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using WorkManager.Callbacks;
+using System.Collections.Concurrent;
+using System.Security.Permissions;
 using WorkManager.DataContracts;
 
 namespace WorkManager
 {
     public class IntegerWorkManager : AbstractWorkManager
     {
-        public readonly static CallbackContainer<IWorker> Callbacks = new CallbackContainer<IWorker>();
-
-        public readonly static List<int> WorkItems = new List<int>(); 
-
-        public CallbackContainer<IWorker> GetWorkers()
-        {
-            return Callbacks;
-        }
-
-        public List<int> GetWorkItems(int i)
-        {
-            return WorkItems;
-        }
+        public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
+        
+        public readonly static ConcurrentDictionary<string, int> AvailableWork = new ConcurrentDictionary<string, int>();
+        public readonly static ConcurrentDictionary<string, int> ActiveWork = new ConcurrentDictionary<string, int>();
 
         /// <summary>
         /// Registers the current client as available to work.  Will add the client
@@ -27,7 +18,10 @@ namespace WorkManager
         /// </summary>
         public override void StartWorking()
         {
-            AddCurrentWorkerToCollection();
+            var callback = GetCurrentWorkerCallback();
+            callback.Active = true;
+            AvailableCallbacks.Add(callback);
+
             BindToCommunicationObjectCallbacks();
         }
 
@@ -44,25 +38,14 @@ namespace WorkManager
         /// </summary>
         public override void StopWorking()
         {
-            RemoveCurrentWorkerFromCollection();
+            var callback = GetCurrentWorkerCallback();
+            callback.Active = false;
         }
 
-        private void AddCurrentWorkerToCollection()
+        public override void WorkComplete(WorkItem workItem)
         {
-            var callbackObject = GetWorkerCallback();
-            Callbacks.Add(callbackObject);
-        }
-
-
-        public void RemoveCurrentWorkerFromCollection()
-        {
-            var callbackObject = GetWorkerCallback();
-            Callbacks.Remove(callbackObject);
-        }
-
-        public override void WorkComplete(int workItemGuid)
-        {
-            throw new NotImplementedException();
+            int outValue;
+            ActiveWork.TryRemove(workItem.WorkGuid, out outValue);
         }
 
         void EventServiceClosing(object sender, EventArgs e)
@@ -78,15 +61,7 @@ namespace WorkManager
         private void HandleDisconnectEvent(object sender, EventArgs e)
         {
             var callback = (IWorker) sender;
-            if (callback != null && Callbacks.Contains(callback))
-            {
-                Callbacks.Remove(callback);
-            }
-        }
-
-        public static void AddWorkItem(int i)
-        {
-            WorkItems.Add(i);
+            
         }
 
     }

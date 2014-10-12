@@ -1,4 +1,5 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
 using WorkManager.DataContracts;
@@ -35,19 +36,40 @@ namespace WorkManager.Tests
             CommunicationObject = null;
             Context = null;
 
+            EmptyAvailableCallbacksObject();
+            IntegerWorkManager.AvailableWork.Clear();
             Mock.Reset();
         }
 
-        [TestMethod]
-        public void StartWorkingShouldAddConnectedClientToPoolOfAvailableClients()
+        private void EmptyAvailableCallbacksObject()
         {
-            Manager.StartWorking();
-
-            CollectionAssert.Contains(Manager.GetWorkers(), WorkerCallback);
+            while (IntegerWorkManager.AvailableCallbacks.Count > 0)
+            {
+                IntegerWorkManager.AvailableCallbacks.Take();
+            }
         }
 
         [TestMethod]
-        public void StartWorkingShouldBindInternalCallbacksToChannelClosedEvent()
+        public void StartWorkingShouldSetCallbackActiveToTrue()
+        {
+            Manager.StartWorking();
+
+            Assert.IsTrue(WorkerCallback.Active);
+        }
+
+        [TestMethod]
+        public void StartWorkingShouldAddWorkerToAvailableCallbacksIfNotAlreadyWorking()
+        {
+            WorkerCallback.IsWorking = false;
+            var expectedCallbackCount = 1;
+
+            Manager.StartWorking();
+
+            Assert.AreEqual(expectedCallbackCount, IntegerWorkManager.AvailableCallbacks.Count);
+        }
+
+        [TestMethod]
+        public void StartWorkingShouldBindToCommunicationObjectClosedEvent()
         {
             Manager.StartWorking();
 
@@ -55,7 +77,7 @@ namespace WorkManager.Tests
         }
 
         [TestMethod]
-        public void StartWorkingShouldBindInternalCallbacksToChannelClosingEvent()
+        public void StartWorkingShouldBindToCommunicationObjectClosingEvent()
         {
             Manager.StartWorking();
 
@@ -63,23 +85,26 @@ namespace WorkManager.Tests
         }
 
         [TestMethod]
-        public void StopWorkingShouldRemoveCurrentWorkerFromAvailableWorkers()
+        public void StopWorkingShouldSetCurrentWorkerToInactive()
         {
             Manager.StartWorking();
             Manager.StopWorking();
 
-            CollectionAssert.DoesNotContain(Manager.GetWorkers(), WorkerCallback);
+            Assert.IsFalse(WorkerCallback.Active);
         }
 
         [TestMethod]
-        public void AddWorkItemShouldAddAWorkItemToCollectionOfAvailableWork()
+        public void WorkCompleteShouldRemoveWorkFromActiveWorkCollection()
         {
-            var workItem = 2;
+            var guid = Guid.NewGuid().ToString();
+            var work = 1;
+            var workItem = new WorkItem(guid, work);
+            IntegerWorkManager.ActiveWork.TryAdd(guid, work);
 
-            IntegerWorkManager.AddWorkItem(2);
+            Manager.WorkComplete(workItem);
 
-            var workItems = Manager.GetWorkItems(2);
-            CollectionAssert.Contains(workItems, workItem);
+            Assert.IsFalse(IntegerWorkManager.ActiveWork.ContainsKey(guid));
         }
+
     }
 }

@@ -80,7 +80,7 @@ namespace WorkManagerApplication
                     Console.WriteLine("Unexpected error parsing input.");
                 }
 
-                intList.ForEach(IntegerWorkManager.AddWorkItem);
+                //intList.ForEach(IntegerWorkManager.AddWorkItem);
             }
         }
 
