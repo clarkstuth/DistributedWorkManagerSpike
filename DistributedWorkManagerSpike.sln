@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Local.testsettings = Local.testsettings
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManagerApplication", "WorkManagerApplication\WorkManagerApplication.csproj", "{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{7A543A5D-49DA-4CE2-87E4-2146A07D9B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A543A5D-49DA-4CE2-87E4-2146A07D9B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A543A5D-49DA-4CE2-87E4-2146A07D9B1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
