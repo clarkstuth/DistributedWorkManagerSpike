@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using WorkManager.Callbacks;
 using WorkManager.DataContracts;
 
 namespace WorkManager
 {
     public class IntegerWorkManager : AbstractWorkManager
     {
-        public readonly static List<IWorker> Workers = new List<IWorker>();
+        public readonly static CallbackContainer<IWorker> Callbacks = new CallbackContainer<IWorker>();
+
         public readonly static List<int> WorkItems = new List<int>(); 
 
-        public List<IWorker> GetWorkers()
+        public CallbackContainer<IWorker> GetWorkers()
         {
-            return Workers;
+            return Callbacks;
         }
 
         public List<int> GetWorkItems(int i)
@@ -44,14 +46,14 @@ namespace WorkManager
         private void AddCurrentWorkerToCollection()
         {
             var callbackObject = GetWorkerCallback();
-            Workers.Add(callbackObject);
+            Callbacks.Add(callbackObject);
         }
 
 
         public void RemoveCurrentWorkerFromCollection()
         {
             var callbackObject = GetWorkerCallback();
-            Workers.Remove(callbackObject);
+            Callbacks.Remove(callbackObject);
         }
 
         public override void WorkComplete(int workItemGuid)
@@ -72,9 +74,9 @@ namespace WorkManager
         private void HandleDisconnectEvent(object sender, EventArgs e)
         {
             var callback = (IWorker) sender;
-            if (callback != null && Workers.Contains(callback))
+            if (callback != null && Callbacks.Contains(callback))
             {
-                Workers.Remove(callback);
+                Callbacks.Remove(callback);
             }
         }
 

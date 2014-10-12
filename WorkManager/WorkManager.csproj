@@ -49,11 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractWorkManager.cs" />
+    <Compile Include="Callbacks\CallbackContainer.cs" />
     <Compile Include="DataContracts\IWorker.cs" />
     <Compile Include="IntegerWorkManager.cs" />
     <Compile Include="IWorkManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WorkDistributer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

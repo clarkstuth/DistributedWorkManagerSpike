@@ -39,8 +39,5 @@ namespace WorkManager
             var workerCallback = operationContext.GetCallbackChannel<IWorker>();
             return workerCallback;
         }
-
-
-
     }
 }
