@@ -76,7 +76,7 @@ namespace WorkManager.Tests
         {
             var workItem = 2;
 
-            Manager.AddWorkItem(2);
+            IntegerWorkManager.AddWorkItem(2);
 
             var workItems = Manager.GetWorkItems(2);
             CollectionAssert.Contains(workItems, workItem);

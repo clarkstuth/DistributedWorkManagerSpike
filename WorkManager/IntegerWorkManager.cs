@@ -78,7 +78,7 @@ namespace WorkManager
             }
         }
 
-        public void AddWorkItem(int i)
+        public static void AddWorkItem(int i)
         {
             WorkItems.Add(i);
         }
