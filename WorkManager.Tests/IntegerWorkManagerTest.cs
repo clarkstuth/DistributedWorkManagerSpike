@@ -3,6 +3,7 @@ using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
 using WorkManager.DataContracts;
+using WorkManager.Exceptions;
 
 namespace WorkManager.Tests
 {
@@ -104,6 +105,40 @@ namespace WorkManager.Tests
             Manager.WorkComplete(workItem);
 
             Assert.IsFalse(IntegerWorkManager.ActiveWork.ContainsKey(guid));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidWorkItemException))]
+        public void WorkCompleteShouldRaiseAnExceptionIfTheWorkGuidDoesNotExist()
+        {
+            var guid = Guid.NewGuid().ToString();
+            var expectedError = String.Format("Provided Work GUID does not exist: {0}", guid);
+            var workItem = new WorkItem(guid, 1);
+
+            try
+            {
+                Manager.WorkComplete(workItem);
+            }
+            catch (InvalidOperationException e)
+            {
+                Assert.AreEqual(expectedError, e.Message);
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void WorkCompleteShouldSetCallbackToNotWorking()
+        {
+            WorkerCallback.IsWorking = true;
+            var guid = Guid.NewGuid().ToString();
+            var value = 1;
+            var workItem = new WorkItem(guid, value);
+            IntegerWorkManager.ActiveWork.TryAdd(guid, value);
+
+            Manager.StartWorking();
+            Manager.WorkComplete(workItem);
+
+            Assert.IsFalse(WorkerCallback.IsWorking);
         }
 
     }

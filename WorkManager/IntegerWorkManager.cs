@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Security.Permissions;
 using WorkManager.DataContracts;
+using WorkManager.Exceptions;
 
 namespace WorkManager
 {
@@ -42,10 +42,23 @@ namespace WorkManager
             callback.Active = false;
         }
 
+        /// <summary>
+        /// Will remove the current work item from being available.
+        /// </summary>
+        /// <param name="workItem"></param>
         public override void WorkComplete(WorkItem workItem)
         {
+            if (!ActiveWork.ContainsKey(workItem.WorkGuid))
+            {
+                var message = String.Format("Provided Work GUID does not exist: {0}", workItem.WorkGuid);
+                throw new InvalidWorkItemException(message);
+            }
+
             int outValue;
             ActiveWork.TryRemove(workItem.WorkGuid, out outValue);
+
+            var workerCallback = GetCurrentWorkerCallback();
+            workerCallback.IsWorking = false;
         }
 
         void EventServiceClosing(object sender, EventArgs e)

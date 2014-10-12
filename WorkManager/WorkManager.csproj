@@ -51,6 +51,7 @@
     <Compile Include="AbstractWorkManager.cs" />
     <Compile Include="DataContracts\IWorker.cs" />
     <Compile Include="DataContracts\WorkItem.cs" />
+    <Compile Include="Exceptions\InvalidWorkItemException.cs" />
     <Compile Include="Factories\WebServiceFactory.cs" />
     <Compile Include="IntegerWorkManager.cs" />
     <Compile Include="IWorkManager.cs" />
