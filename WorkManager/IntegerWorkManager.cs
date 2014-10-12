@@ -10,10 +10,8 @@ namespace WorkManager
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
         
         public readonly static ConcurrentDictionary<Guid, int> AllWork = new ConcurrentDictionary<Guid, int>(); 
-
-        public readonly static ConcurrentDictionary<Guid, int> AvailableWork = new ConcurrentDictionary<Guid, int>();
-
-        public readonly static ConcurrentDictionary<Guid, IWorker> ActiveWork = new ConcurrentDictionary<Guid, IWorker>();
+        public readonly static ConcurrentDictionary<Guid, int> UnassignedWork = new ConcurrentDictionary<Guid, int>();
+        public readonly static ConcurrentDictionary<IWorker, Guid> AssignedWork = new ConcurrentDictionary<IWorker, Guid>();
 
         /// <summary>
         /// Registers the current client as available to work.  Will add the client
@@ -51,36 +49,23 @@ namespace WorkManager
         /// <param name="workItem"></param>
         public override void WorkComplete(WorkItem workItem)
         {
-            GenerateExceptionIfGuidDoesNotExist(workItem.WorkGuid);
-
-            IWorker assignedClient;
-            ActiveWork.TryRemove(workItem.WorkGuid, out assignedClient);
-
             var workerCallback = GetCurrentWorkerCallback();
+
+            if (AssignedWork.ContainsKey(workerCallback))
+            {
+                Guid assignedGuid;
+                AssignedWork.TryRemove(workerCallback, out assignedGuid);
+            }
+
             workerCallback.IsWorking = false;
-
-            if (workerCallback != assignedClient)
-            {
-                var message = String.Format("Work Guid: '{0}' not assigned to reporting callback.", workItem.WorkGuid);
-                throw new WorkNotAssignedException(message);
-            }
         }
 
-        private static void GenerateExceptionIfGuidDoesNotExist(Guid guid)
-        {
-            if (!ActiveWork.ContainsKey(guid))
-            {
-                var message = String.Format("Provided Work GUID does not exist: {0}", guid);
-                throw new InvalidWorkItemException(message);
-            }
-        }
-
-        void EventServiceClosing(object sender, EventArgs e)
+        private static void EventServiceClosing(object sender, EventArgs e)
         {
             HandleDisconnectEvent(sender, e);
         }
 
-        void EventServiceClosed(object sender, EventArgs e)
+        private static void EventServiceClosed(object sender, EventArgs e)
         {
             HandleDisconnectEvent(sender, e);
         }
@@ -89,6 +74,15 @@ namespace WorkManager
         {
             var callback = (IWorker) sender;
             callback.Active = false;
+
+            if (callback.IsWorking && AssignedWork.ContainsKey(callback))
+            {
+                Guid assignedGuid;
+                AssignedWork.TryRemove(callback, out assignedGuid);
+
+                UnassignedWork.GetOrAdd(assignedGuid, AllWork[assignedGuid]);
+                callback.IsWorking = false;
+            }
         }
 
     }

@@ -38,8 +38,8 @@ namespace WorkManager.Tests
             Context = null;
 
             EmptyAvailableCallbacksObject();
-            IntegerWorkManager.AvailableWork.Clear();
-            IntegerWorkManager.ActiveWork.Clear();
+            IntegerWorkManager.UnassignedWork.Clear();
+            IntegerWorkManager.AssignedWork.Clear();
             Mock.Reset();
         }
 
@@ -101,30 +101,11 @@ namespace WorkManager.Tests
             var guid = Guid.NewGuid();
             var work = 1;
             var workItem = new WorkItem(guid, work);
-            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
 
             Manager.WorkComplete(workItem);
 
-            Assert.IsFalse(IntegerWorkManager.ActiveWork.ContainsKey(guid));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidWorkItemException))]
-        public void WorkCompleteShouldRaiseAnExceptionIfTheWorkGuidDoesNotExist()
-        {
-            var guid = Guid.NewGuid();
-            var expectedError = String.Format("Provided Work GUID does not exist: {0}", guid);
-            var workItem = new WorkItem(guid, 1);
-
-            try
-            {
-                Manager.WorkComplete(workItem);
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.AreEqual(expectedError, e.Message);
-                throw;
-            }
+            Assert.IsFalse(IntegerWorkManager.AssignedWork.ContainsKey(WorkerCallback));
         }
 
         [TestMethod]
@@ -134,34 +115,12 @@ namespace WorkManager.Tests
             var guid = Guid.NewGuid();
             var value = 1;
             var workItem = new WorkItem(guid, value);
-            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
 
             Manager.StartWorking();
             Manager.WorkComplete(workItem);
 
             Assert.IsFalse(WorkerCallback.IsWorking);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(WorkNotAssignedException))]
-        public void WorkCompleteShouldGenerateAnExceptionIfWorkGuidIsNotAssignedToExistingWorker()
-        {
-            var guid = Guid.NewGuid();
-            var value = 1;
-            var workItem = new WorkItem(guid, value);
-            var differentAssignedCallback = Mock.Create<IWorker>();
-            IntegerWorkManager.ActiveWork.TryAdd(guid, differentAssignedCallback);
-            var expectedError = String.Format("Work Guid: '{0}' not assigned to reporting callback.", guid);
-
-            try
-            {
-                Manager.WorkComplete(workItem);
-            }
-            catch (WorkNotAssignedException e)
-            {
-                Assert.AreEqual(expectedError, e.Message);
-                throw;
-            }
         }
 
         [TestMethod]
@@ -175,17 +134,48 @@ namespace WorkManager.Tests
         }
 
         [TestMethod]
-        public void CallbackClosedEventShouldPutWorkBackIntoAvailableWorkIfWorkWasActive()
+        public void CallbackClosingEventShouldSetCallbackActiveToFalse()
         {
             Manager.StartWorking();
+
+            CommunicationObject.TriggerClosingEvent(WorkerCallback);
+
+            Assert.IsFalse(WorkerCallback.Active);
+        }
+
+        [TestMethod]
+        public void CallbackClosedEventShouldPutWorkBackIntoAvailableWorkIfAssigned()
+        {
+            WorkerCallback.IsWorking = true;
+
             var guid = Guid.NewGuid();
             var work = 2;
-            var workItem = new WorkItem(guid, work);
-            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
+            IntegerWorkManager.AllWork.TryAdd(guid, work);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
 
+            Manager.StartWorking();
             CommunicationObject.TriggerClosedEvent(WorkerCallback);
 
+            Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
         }
+
+        [TestMethod]
+        public void CallbackClosingEventShouldPutWorkBackIntoAvailableWorkIfAssigned()
+        {
+            WorkerCallback.IsWorking = true;
+
+            var guid = Guid.NewGuid();
+            var work = 2;
+            IntegerWorkManager.AllWork.TryAdd(guid, work);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+
+            Manager.StartWorking();
+            CommunicationObject.TriggerClosingEvent(WorkerCallback);
+
+            Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
+        }
+
+
 
     }
 }

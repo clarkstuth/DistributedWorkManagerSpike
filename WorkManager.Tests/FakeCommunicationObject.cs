@@ -103,7 +103,7 @@ namespace WorkManager.Tests
             }
         }
 
-        public void TriggerClosingEvent(WorkItem sender)
+        public void TriggerClosingEvent(IWorker sender)
         {
             if (Closing != null)
             {
