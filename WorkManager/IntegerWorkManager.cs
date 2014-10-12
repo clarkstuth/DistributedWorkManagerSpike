@@ -41,6 +41,8 @@ namespace WorkManager
         {
             var callback = GetCurrentWorkerCallback();
             callback.Active = false;
+
+            PutAssignedWorkBackIntoAvailableCollection(callback);
         }
 
         /// <summary>
@@ -75,14 +77,20 @@ namespace WorkManager
             var callback = (IWorker) sender;
             callback.Active = false;
 
+            PutAssignedWorkBackIntoAvailableCollection(callback);
+        }
+
+        private static void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)
+        {
             if (callback.IsWorking && AssignedWork.ContainsKey(callback))
             {
                 Guid assignedGuid;
                 AssignedWork.TryRemove(callback, out assignedGuid);
 
                 UnassignedWork.GetOrAdd(assignedGuid, AllWork[assignedGuid]);
-                callback.IsWorking = false;
+                
             }
+            callback.IsWorking = false;
         }
 
     }
