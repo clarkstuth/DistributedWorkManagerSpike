@@ -37,7 +37,11 @@ namespace WorkManager
             communicationObject.Closed += EventServiceClosed;
             communicationObject.Closing += EventServiceClosing;
         }
-        
+
+        /// <summary>
+        /// Removes the current client from the list available to work on things.
+        /// If work is currently assigned to the client it will e
+        /// </summary>
         public override void StopWorking()
         {
             RemoveCurrentWorkerFromCollection();

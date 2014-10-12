@@ -81,6 +81,5 @@ namespace WorkManager.Tests
             var workItems = Manager.GetWorkItems(2);
             CollectionAssert.Contains(workItems, workItem);
         }
-
     }
 }
