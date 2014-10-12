@@ -97,10 +97,10 @@ namespace WorkManager.Tests
         [TestMethod]
         public void WorkCompleteShouldRemoveWorkFromActiveWorkCollection()
         {
-            var guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid();
             var work = 1;
             var workItem = new WorkItem(guid, work);
-            IntegerWorkManager.ActiveWork.TryAdd(guid, work);
+            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
 
             Manager.WorkComplete(workItem);
 
@@ -111,7 +111,7 @@ namespace WorkManager.Tests
         [ExpectedException(typeof(InvalidWorkItemException))]
         public void WorkCompleteShouldRaiseAnExceptionIfTheWorkGuidDoesNotExist()
         {
-            var guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid();
             var expectedError = String.Format("Provided Work GUID does not exist: {0}", guid);
             var workItem = new WorkItem(guid, 1);
 
@@ -130,15 +130,37 @@ namespace WorkManager.Tests
         public void WorkCompleteShouldSetCallbackToNotWorking()
         {
             WorkerCallback.IsWorking = true;
-            var guid = Guid.NewGuid().ToString();
+            var guid = Guid.NewGuid();
             var value = 1;
             var workItem = new WorkItem(guid, value);
-            IntegerWorkManager.ActiveWork.TryAdd(guid, value);
+            IntegerWorkManager.ActiveWork.TryAdd(guid, WorkerCallback);
 
             Manager.StartWorking();
             Manager.WorkComplete(workItem);
 
             Assert.IsFalse(WorkerCallback.IsWorking);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(WorkNotAssignedException))]
+        public void WorkCompleteShouldGenerateAnExceptionIfWorkGuidIsNotAssignedToExistingWorker()
+        {
+            var guid = Guid.NewGuid();
+            var value = 1;
+            var workItem = new WorkItem(guid, value);
+            var differentAssignedCallback = Mock.Create<IWorker>();
+            IntegerWorkManager.ActiveWork.TryAdd(guid, differentAssignedCallback);
+            var expectedError = String.Format("Work Guid: '{0}' not assigned to reporting callback.", guid);
+
+            try
+            {
+                Manager.WorkComplete(workItem);
+            }
+            catch (WorkNotAssignedException e)
+            {
+                Assert.AreEqual(expectedError, e.Message);
+                throw;
+            }
         }
 
     }

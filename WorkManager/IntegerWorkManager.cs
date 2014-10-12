@@ -9,8 +9,9 @@ namespace WorkManager
     {
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
         
-        public readonly static ConcurrentDictionary<string, int> AvailableWork = new ConcurrentDictionary<string, int>();
-        public readonly static ConcurrentDictionary<string, int> ActiveWork = new ConcurrentDictionary<string, int>();
+        public readonly static ConcurrentDictionary<Guid, int> AvailableWork = new ConcurrentDictionary<Guid, int>();
+
+        public readonly static ConcurrentDictionary<Guid, IWorker> ActiveWork = new ConcurrentDictionary<Guid, IWorker>();
 
         /// <summary>
         /// Registers the current client as available to work.  Will add the client
@@ -54,11 +55,16 @@ namespace WorkManager
                 throw new InvalidWorkItemException(message);
             }
 
-            int outValue;
-            ActiveWork.TryRemove(workItem.WorkGuid, out outValue);
+            IWorker assignedClient;
+            ActiveWork.TryRemove(workItem.WorkGuid, out assignedClient);
 
             var workerCallback = GetCurrentWorkerCallback();
             workerCallback.IsWorking = false;
+            if (workerCallback != assignedClient)
+            {
+                var message = String.Format("Work Guid: '{0}' not assigned to reporting callback.", workItem.WorkGuid);
+                throw new WorkNotAssignedException(message);
+            }
         }
 
         void EventServiceClosing(object sender, EventArgs e)

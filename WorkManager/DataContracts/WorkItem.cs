@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace WorkManager.DataContracts
 {
@@ -9,9 +10,9 @@ namespace WorkManager.DataContracts
         public readonly int WorkToDo;
 
         [DataMember(IsRequired = true)]
-        public readonly string WorkGuid;
+        public readonly Guid WorkGuid;
 
-        public WorkItem(string workGuid, int workToDo)
+        public WorkItem(Guid workGuid, int workToDo)
         {
             WorkGuid = workGuid;
             WorkToDo = workToDo;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ServiceModel;
+using WorkManager.DataContracts;
 
 namespace WorkManager.Tests
 {
@@ -91,6 +92,24 @@ namespace WorkManager.Tests
                 return true;
             }
             return false;
+        }
+
+        public void TriggerClosedEvent(IWorker sender)
+        {
+            if (Closed != null)
+            {
+                EventArgs args = null;
+                Closed(sender, args);
+            }
+        }
+
+        public void TriggerClosingEvent(WorkItem sender)
+        {
+            if (Closing != null)
+            {
+                EventArgs args = null;
+                Closing(sender, args);
+            }
         }
 
     }
