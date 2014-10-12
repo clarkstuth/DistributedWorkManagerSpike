@@ -10,20 +10,20 @@ namespace WorkManager
         public abstract void StopWorking();
         public abstract void WorkComplete(WorkItem workItem);
 
-        protected OperationContext _operationContext { get; set; }
+        private OperationContext OperationContext { get; set; }
 
         public OperationContext GetOperationContext()
         {
-            if (_operationContext == null)
+            if (OperationContext == null)
             {
-                _operationContext = OperationContext.Current;
+                OperationContext = OperationContext.Current;
             }
-            return _operationContext;
+            return OperationContext;
         }
 
         public void SetOperationContext(OperationContext context)
         {
-            _operationContext = context;
+            OperationContext = context;
         }
 
         protected ICommunicationObject GetCallbackChannel()
