@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using WorkManager.DataContracts;
 
@@ -7,11 +8,17 @@ namespace WorkManager
     public class IntegerWorkManager : AbstractWorkManager
     {
         public readonly static List<IWorker> Workers = new List<IWorker>();
-        
+        public readonly static List<int> WorkItems = new List<int>(); 
+
         public List<IWorker> GetWorkers()
         {
             return Workers;
-        } 
+        }
+
+        public List<int> GetWorkItems(int i)
+        {
+            return WorkItems;
+        }
 
         /// <summary>
         /// Registers the current client as available to work.  Will add the client
@@ -70,6 +77,11 @@ namespace WorkManager
             {
                 Workers.Remove(callback);
             }
+        }
+
+        public void AddWorkItem(int i)
+        {
+            WorkItems.Add(i);
         }
 
     }
