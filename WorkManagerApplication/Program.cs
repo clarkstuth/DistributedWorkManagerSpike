@@ -1,48 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 using WorkManager;
+using WorkManager.Factories;
 
 namespace WorkManagerApplication
 {
     public class Program
     {
-        public static ServiceHost IntegerWebServiceHost { get; set; }
+        static WorkDistributer Distributer { get; set; }
 
         static void Main(string[] args)
         {
             try
             {
-                CreateWebServiceHost();
-                StartWebServiceHost();
+                CreateWorkDistributer();
+                Distributer.StartDistrubutingWork();
 
                 DisplayStartupMessage();
                 PassUserInputToWorkManager();
             }
             finally
             {
-                CloseWebServiceHost();
+                StopDistributingWork();
             }
         }
 
-        static void CreateWebServiceHost()
+        static void CreateWorkDistributer()
         {
-            IntegerWebServiceHost = new ServiceHost(typeof(IntegerWorkManager));
+            var workDistributerFactory = new WorkDistributerFactory();
+            Distributer = workDistributerFactory.CreateWorkDistributer();
         }
 
-        static void StartWebServiceHost()
+        static void StopDistributingWork()
         {
-            Console.WriteLine("Starting web service host...");
-            IntegerWebServiceHost.Open();
-        }
-
-        static void CloseWebServiceHost()
-        {
-            if (IntegerWebServiceHost.State == CommunicationState.Opened ||
-                IntegerWebServiceHost.State == CommunicationState.Opening)
+            if (Distributer.IsDistributingWork)
             {
-                Console.WriteLine("Closing web service host...");
-                IntegerWebServiceHost.Close();
+                Console.WriteLine("Stopping work distribution...");
+                Distributer.StopDistributingWork();
             }
         }
 
@@ -80,7 +74,7 @@ namespace WorkManagerApplication
                     Console.WriteLine("Unexpected error parsing input.");
                 }
 
-                //intList.ForEach(IntegerWorkManager.AddWorkItem);
+                Distributer.AddWork(intList);
             }
         }
 

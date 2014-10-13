@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.ServiceModel;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -213,6 +212,27 @@ namespace WorkManager.Tests
             Assert.IsTrue(oneSeen);
             Assert.IsTrue(twoSeen);
             Assert.IsTrue(threeSeen);
+        }
+
+        [TestMethod]
+        public void StartDistributingShouldSetServiceHostToOpen()
+        {
+            Mock.Arrange(() => Host.Open()).DoNothing().MustBeCalled();
+
+            Distributer.StartDistrubutingWork();
+
+            Mock.Assert(Host);
+        }
+
+        [TestMethod]
+        public void StopDistributingShouldSetServiceHostToClosed()
+        {
+            Mock.Arrange(() => Host.Close()).DoNothing().MustBeCalled();
+
+            Distributer.StartDistrubutingWork();
+            Distributer.StopDistributingWork();
+
+            Mock.Assert(Host);
         }
 
     }

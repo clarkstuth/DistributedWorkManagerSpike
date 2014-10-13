@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.Threading;
 using WorkManager.DataContracts;
@@ -41,8 +40,11 @@ namespace WorkManager
 
         public void StartDistrubutingWork()
         {
+            
             if (!IsDistributingWork)
             {
+                Host.Open();
+
                 IsDistributingWork = true;
                 Cancellation = new CancellationTokenSource();
 
@@ -68,6 +70,8 @@ namespace WorkManager
                 Cancellation.Cancel();
             }
             IsDistributingWork = false;
+
+            Host.Close();
         }
 
         public void DistributeWorkThread(CancellationToken cancelToken)
@@ -129,6 +133,7 @@ namespace WorkManager
         public void Dispose()
         {
             StopDistributingWork();
+            Host.Close();
         }
     }
 }

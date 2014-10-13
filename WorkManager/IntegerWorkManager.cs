@@ -18,6 +18,7 @@ namespace WorkManager
         /// </summary>
         public override void StartWorking()
         {
+            Console.WriteLine("Client connected.");
             var callback = GetCurrentWorkerCallback();
             callback.Active = true;
             AvailableCallbacks.Add(callback);

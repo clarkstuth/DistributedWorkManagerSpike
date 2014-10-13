@@ -14,6 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManagerApplication", "WorkManagerApplication\WorkManagerApplication.csproj", "{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkManager.Client", "WorkManager.Client\WorkManager.Client.csproj", "{FF6D87F6-4C15-404B-82CF-869DDED4AE72}"
+	ProjectSection(ProjectDependencies) = postProject
+		{90777860-6679-445C-B932-47C3E4E1627A} = {90777860-6679-445C-B932-47C3E4E1627A}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +37,10 @@ Global
 		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B79CDE2-4D7F-4358-B4CC-9B0B1CCBF912}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF6D87F6-4C15-404B-82CF-869DDED4AE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF6D87F6-4C15-404B-82CF-869DDED4AE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF6D87F6-4C15-404B-82CF-869DDED4AE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF6D87F6-4C15-404B-82CF-869DDED4AE72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

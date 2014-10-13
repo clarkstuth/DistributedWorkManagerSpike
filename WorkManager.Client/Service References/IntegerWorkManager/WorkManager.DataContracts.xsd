@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:tns="http://schemas.datacontract.org/2004/07/WorkManager.DataContracts" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/WorkManager.DataContracts" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:complexType name="WorkItem">
+    <xs:sequence>
+      <xs:element name="WorkGuid" type="ser:guid" />
+      <xs:element name="WorkToDo" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="WorkItem" nillable="true" type="tns:WorkItem" />
+</xs:schema>
