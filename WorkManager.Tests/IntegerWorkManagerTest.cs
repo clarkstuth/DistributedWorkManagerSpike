@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
@@ -177,6 +178,24 @@ namespace WorkManager.Tests
             Manager.StopWorking();
 
             Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
+        }
+
+        [TestMethod]
+        public void WorkCompleteShouldAddTheCurrentCallbackBackIntoTheCollectionOfAvailableCallbacks()
+        {
+            WorkerCallback.IsWorking = true;
+
+            var guid = Guid.NewGuid();
+            var work = 2;
+            IntegerWorkManager.AllWork.TryAdd(guid, work);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+
+            var workItem = new WorkItem(guid, work);
+
+            Manager.WorkComplete(workItem);
+
+            Assert.IsTrue(IntegerWorkManager.AvailableCallbacks.Any((callback) => callback == WorkerCallback));
         }
 
     }

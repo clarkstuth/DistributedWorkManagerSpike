@@ -66,6 +66,7 @@ namespace WorkManager
                 AssignedWork.TryRemove(workerCallback, out assignedGuid);
             }
 
+            AvailableCallbacks.Add(workerCallback);
             workerCallback.IsWorking = false;
         }
 
