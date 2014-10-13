@@ -88,14 +88,7 @@ namespace WorkManager
                 if (worker != null && worker.Active && !worker.IsWorking)
                 {
                     var work = GetHighestPriorityWork();
-                    if (work != null)
-                    {
-                        worker.DoWork(work);
-                    }
-                    else
-                    {
-                        IntegerWorkManager.AvailableCallbacks.Add(worker);
-                    }
+                    worker.DoWork(work);
                 }
             }
         }

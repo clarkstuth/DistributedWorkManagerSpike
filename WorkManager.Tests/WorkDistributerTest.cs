@@ -155,13 +155,17 @@ namespace WorkManager.Tests
         [TestMethod]
         public void StartDistributingWorkWithMultipleItemsShouldDistributeToAllAvailableWorkersInCorrectOrder()
         {
+            //Arrange
             var items = new List<int> {1, 2, 3};
+
             var worker1 = Mock.Create<IWorker>();
             worker1.Active = true;
             worker1.IsWorking = false;
+
             var worker2 = Mock.Create<IWorker>();
             worker2.Active = true;
             worker2.IsWorking = false;
+
             var worker3 = Mock.Create<IWorker>();
             worker3.Active = true;
             worker3.IsWorking = false;
@@ -194,6 +198,7 @@ namespace WorkManager.Tests
             Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
             Mock.Arrange(() => worker3.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
 
+            //Act
             Distributer.AddWork(items);
             Distributer.StartDistrubutingWork();
 
@@ -201,6 +206,7 @@ namespace WorkManager.Tests
 
             Distributer.StopDistributingWork();
 
+            //Assert
             Assert.AreEqual(3, sequence[0]);
             Assert.AreEqual(2, sequence[1]);
             Assert.AreEqual(1, sequence[2]);
