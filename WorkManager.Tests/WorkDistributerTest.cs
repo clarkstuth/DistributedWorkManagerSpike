@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.ServiceModel;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -148,6 +149,64 @@ namespace WorkManager.Tests
             Distributer.StartDistrubutingWork();
 
             Assert.IsFalse(IntegerWorkManager.AvailableCallbacks.Any(callback => callback == worker));
+        }
+
+        //TODO: MAKE ME NOT HATE MYSELF SO MUCH FOR THESE FEW TESTS
+        [TestMethod]
+        public void StartDistributingWorkWithMultipleItemsShouldDistributeToAllAvailableWorkersInCorrectOrder()
+        {
+            var items = new List<int> {1, 2, 3};
+            var worker1 = Mock.Create<IWorker>();
+            worker1.Active = true;
+            worker1.IsWorking = false;
+            var worker2 = Mock.Create<IWorker>();
+            worker2.Active = true;
+            worker2.IsWorking = false;
+            var worker3 = Mock.Create<IWorker>();
+            worker3.Active = true;
+            worker3.IsWorking = false;
+
+            bool oneSeen = false, twoSeen = false, threeSeen = false;
+            var sequence = new List<int>();
+
+            var action = new Action<WorkItem>((item) =>
+            {
+                switch (item.WorkToDo)
+                {
+                    case 1:
+                        oneSeen = true;
+                        break;
+                    case 2:
+                        twoSeen = true;
+                        break;
+                    case 3:
+                        threeSeen = true;
+                        break;
+                }
+                sequence.Add(item.WorkToDo);
+            });
+
+            IntegerWorkManager.AvailableCallbacks.Add(worker1);
+            IntegerWorkManager.AvailableCallbacks.Add(worker2);
+            IntegerWorkManager.AvailableCallbacks.Add(worker3);
+
+            Mock.Arrange(() => worker1.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
+            Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
+            Mock.Arrange(() => worker3.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
+
+            Distributer.AddWork(items);
+            Distributer.StartDistrubutingWork();
+
+            Thread.Sleep(TimeSpan.FromSeconds(3));
+
+            Distributer.StopDistributingWork();
+
+            Assert.AreEqual(3, sequence[0]);
+            Assert.AreEqual(2, sequence[1]);
+            Assert.AreEqual(1, sequence[2]);
+            Assert.IsTrue(oneSeen);
+            Assert.IsTrue(twoSeen);
+            Assert.IsTrue(threeSeen);
         }
 
     }
