@@ -19,6 +19,7 @@ namespace WorkManager
         public bool IsDistributingWork { get; set; }
 
         private WorkContainer WorkContainer { get; set; }
+        private CallbackContainer CallbackContainer { get; set; }
 
         protected virtual void OnDistributionCancelled()
         {
@@ -26,10 +27,11 @@ namespace WorkManager
             if (handler != null) handler(this, EventArgs.Empty);
         }
 
-        public WorkDistributer(ServiceHost host, WorkContainer workContainer)
+        public WorkDistributer(ServiceHost host, WorkContainer workContainer, CallbackContainer callbackContainer)
         {
             Host = host;
             WorkContainer = workContainer;
+            CallbackContainer = callbackContainer;
         }
 
         public void AddWork(List<int> workToDo)

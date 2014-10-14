@@ -15,6 +15,7 @@ namespace WorkManager.Tests
     {
         ServiceHost Host { get; set; }
         WorkContainer WorkContainer { get; set; }
+        CallbackContainer CallbackContainer { get; set; }
         WorkDistributer Distributer { get; set; }
 
         [TestInitialize]
@@ -23,14 +24,16 @@ namespace WorkManager.Tests
             base.SetUp();
             Host = Mock.Create<ServiceHost>();
             WorkContainer = new WorkContainer();
-            Distributer = new WorkDistributer(Host, WorkContainer);
+            CallbackContainer = new CallbackContainer();
+            Distributer = new WorkDistributer(Host, WorkContainer, CallbackContainer);
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            WorkContainer = null;
             Distributer = null;
+            CallbackContainer = null;
+            WorkContainer = null;
             Host = null;
             base.TearDown();
         }

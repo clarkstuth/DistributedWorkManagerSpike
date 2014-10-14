@@ -15,7 +15,9 @@ namespace WorkManager.Tests
         OperationContext Context { get; set; }
         FakeCommunicationObject CommunicationObject { get; set; }
         IWorker WorkerCallback { get; set; }
+
         WorkContainer WorkContainer { get; set; }
+        CallbackContainer CallbackContainer { get; set; }
 
         [TestInitialize]
         public void SetUp()
@@ -23,13 +25,15 @@ namespace WorkManager.Tests
             base.SetUp();
             Context = Mock.Create<OperationContext>();
             CommunicationObject = new FakeCommunicationObject();
-            WorkContainer = new WorkContainer();
-            WorkerCallback = Mock.Create<IWorker>();
 
+            WorkerCallback = Mock.Create<IWorker>();
             Mock.Arrange(() => Context.GetCallbackChannel<ICommunicationObject>()).Returns(CommunicationObject);
             Mock.Arrange(() => Context.GetCallbackChannel<IWorker>()).Returns(WorkerCallback);
 
-            Manager = new IntegerWorkManager(WorkContainer);
+            WorkContainer = new WorkContainer();
+            CallbackContainer = new CallbackContainer();
+
+            Manager = new IntegerWorkManager(WorkContainer, CallbackContainer);
             Manager.SetOperationContext(Context);
         }
 
@@ -39,6 +43,7 @@ namespace WorkManager.Tests
             Manager = null;
             WorkerCallback = null;
             WorkContainer = null;
+            CallbackContainer = null;
             CommunicationObject = null;
             Context = null;
             base.TearDown();

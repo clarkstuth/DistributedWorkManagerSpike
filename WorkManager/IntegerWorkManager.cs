@@ -10,11 +10,13 @@ namespace WorkManager
         public readonly static ConcurrentBag<IWorker> AllCallbacks = new ConcurrentBag<IWorker>();
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
 
-        public WorkContainer WorkContainer { get; set; }
+        private CallbackContainer CallbackContainer { get; set; }
+        private WorkContainer WorkContainer { get; set; }
 
-        public IntegerWorkManager(WorkContainer workContainer)
+        public IntegerWorkManager(WorkContainer workContainer, CallbackContainer callbackContainer)
         {
             WorkContainer = workContainer;
+            CallbackContainer = callbackContainer;
         }
 
         /// <summary>
