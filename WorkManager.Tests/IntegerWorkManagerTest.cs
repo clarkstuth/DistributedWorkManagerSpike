@@ -3,6 +3,7 @@ using System.Linq;
 using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
+using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 
 namespace WorkManager.Tests
@@ -14,6 +15,7 @@ namespace WorkManager.Tests
         OperationContext Context { get; set; }
         FakeCommunicationObject CommunicationObject { get; set; }
         IWorker WorkerCallback { get; set; }
+        WorkContainer WorkContainer { get; set; }
 
         [TestInitialize]
         public void SetUp()
@@ -21,12 +23,13 @@ namespace WorkManager.Tests
             base.SetUp();
             Context = Mock.Create<OperationContext>();
             CommunicationObject = new FakeCommunicationObject();
+            WorkContainer = new WorkContainer();
             WorkerCallback = Mock.Create<IWorker>();
 
             Mock.Arrange(() => Context.GetCallbackChannel<ICommunicationObject>()).Returns(CommunicationObject);
             Mock.Arrange(() => Context.GetCallbackChannel<IWorker>()).Returns(WorkerCallback);
 
-            Manager = new IntegerWorkManager();
+            Manager = new IntegerWorkManager(WorkContainer);
             Manager.SetOperationContext(Context);
         }
 
@@ -35,6 +38,7 @@ namespace WorkManager.Tests
         {
             Manager = null;
             WorkerCallback = null;
+            WorkContainer = null;
             CommunicationObject = null;
             Context = null;
             base.TearDown();
@@ -90,11 +94,11 @@ namespace WorkManager.Tests
             var guid = Guid.NewGuid();
             var work = 1;
             var workItem = new WorkItem(guid, work);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            WorkContainer.SetAssignedWork(WorkerCallback, guid);
 
             Manager.WorkComplete(workItem);
 
-            Assert.IsFalse(IntegerWorkManager.AssignedWork.ContainsKey(WorkerCallback));
+            Assert.IsFalse(WorkContainer.IsWorkAssigned(WorkerCallback));
         }
 
         [TestMethod]
@@ -104,7 +108,7 @@ namespace WorkManager.Tests
             var guid = Guid.NewGuid();
             var value = 1;
             var workItem = new WorkItem(guid, value);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            WorkContainer.SetAssignedWork(WorkerCallback, guid);
 
             Manager.StartWorking();
             Manager.WorkComplete(workItem);
@@ -136,16 +140,13 @@ namespace WorkManager.Tests
         public void CallbackClosedEventShouldPutWorkBackIntoAvailableWorkIfAssigned()
         {
             WorkerCallback.IsWorking = true;
-
-            var guid = Guid.NewGuid();
             var work = 2;
-            IntegerWorkManager.AllWork.TryAdd(guid, work);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            var guid = WorkContainer.AddNewWork(work);
 
             Manager.StartWorking();
             CommunicationObject.TriggerClosedEvent(WorkerCallback);
 
-            Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
+            Assert.AreEqual(work, WorkContainer.GetUnassignedWorkValue(guid));
         }
 
         [TestMethod]
@@ -153,15 +154,13 @@ namespace WorkManager.Tests
         {
             WorkerCallback.IsWorking = true;
 
-            var guid = Guid.NewGuid();
             var work = 2;
-            IntegerWorkManager.AllWork.TryAdd(guid, work);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            var guid = WorkContainer.AddNewWork(work);
 
             Manager.StartWorking();
             CommunicationObject.TriggerClosingEvent(WorkerCallback);
 
-            Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
+            Assert.AreEqual(work, WorkContainer.GetUnassignedWorkValue(guid));
         }
 
         [TestMethod]
@@ -169,15 +168,13 @@ namespace WorkManager.Tests
         {
             WorkerCallback.IsWorking = true;
 
-            var guid = Guid.NewGuid();
             var work = 2;
-            IntegerWorkManager.AllWork.TryAdd(guid, work);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            var guid = WorkContainer.AddNewWork(work);
 
             Manager.StartWorking();
             Manager.StopWorking();
 
-            Assert.AreEqual(work, IntegerWorkManager.UnassignedWork[guid]);
+            Assert.AreEqual(work, WorkContainer.GetUnassignedWorkValue(guid));
         }
 
         [TestMethod]
@@ -185,11 +182,8 @@ namespace WorkManager.Tests
         {
             WorkerCallback.IsWorking = true;
 
-            var guid = Guid.NewGuid();
             var work = 2;
-            IntegerWorkManager.AllWork.TryAdd(guid, work);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
-            IntegerWorkManager.AssignedWork.TryAdd(WorkerCallback, guid);
+            var guid = WorkContainer.AddNewWork(work);
 
             var workItem = new WorkItem(guid, work);
 

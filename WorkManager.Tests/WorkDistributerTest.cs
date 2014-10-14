@@ -5,6 +5,7 @@ using System.ServiceModel;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
+using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 
 namespace WorkManager.Tests
@@ -13,6 +14,7 @@ namespace WorkManager.Tests
     public class WorkDistributerTest : AbstractIntegerServiceAwareTestCase
     {
         ServiceHost Host { get; set; }
+        WorkContainer WorkContainer { get; set; }
         WorkDistributer Distributer { get; set; }
 
         [TestInitialize]
@@ -20,13 +22,14 @@ namespace WorkManager.Tests
         {
             base.SetUp();
             Host = Mock.Create<ServiceHost>();
-            
-            Distributer = new WorkDistributer(Host);
+            WorkContainer = new WorkContainer();
+            Distributer = new WorkDistributer(Host, WorkContainer);
         }
 
         [TestCleanup]
         public void TearDown()
         {
+            WorkContainer = null;
             Distributer = null;
             Host = null;
             base.TearDown();
@@ -39,7 +42,7 @@ namespace WorkManager.Tests
 
             Distributer.AddWork(workToDo);
 
-            Assert.IsTrue(IntegerWorkManager.AllWork.ContainsValue(workToDo[0]));
+            Assert.IsTrue(WorkContainer.WorkValueExists(workToDo[0]));
         }
 
         [TestMethod]
@@ -49,8 +52,8 @@ namespace WorkManager.Tests
 
             Distributer.AddWork(workToDo);
 
-            Assert.IsTrue(IntegerWorkManager.AllWork.ContainsValue(workToDo[0]));
-            Assert.IsTrue(IntegerWorkManager.AllWork.ContainsValue(workToDo[1]));
+            Assert.IsTrue(WorkContainer.WorkValueExists(workToDo[0]));
+            Assert.IsTrue(WorkContainer.WorkValueExists(workToDo[1]));
         }
 
         [TestMethod]
@@ -60,8 +63,8 @@ namespace WorkManager.Tests
 
             Distributer.AddWork(workToDo);
 
-            Assert.IsTrue(IntegerWorkManager.UnassignedWork.ContainsValue(workToDo[0]));
-            Assert.IsTrue(IntegerWorkManager.UnassignedWork.ContainsValue(workToDo[1]));
+            Assert.IsTrue(WorkContainer.UnassignedWorkValueExists(workToDo[0]));
+            Assert.IsTrue(WorkContainer.UnassignedWorkValueExists(workToDo[1]));
         }
 
         [TestMethod]

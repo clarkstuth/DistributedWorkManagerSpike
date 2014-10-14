@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 
 namespace WorkManager
 {
     public class IntegerWorkManager : AbstractWorkManager
     {
+        public readonly static ConcurrentBag<IWorker> AllCallbacks = new ConcurrentBag<IWorker>();
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
-        
-        public readonly static ConcurrentDictionary<Guid, int> AllWork = new ConcurrentDictionary<Guid, int>(); 
-        public readonly static ConcurrentDictionary<Guid, int> UnassignedWork = new ConcurrentDictionary<Guid, int>();
-        public readonly static ConcurrentDictionary<IWorker, Guid> AssignedWork = new ConcurrentDictionary<IWorker, Guid>();
+
+        public WorkContainer WorkContainer { get; set; }
+
+        public IntegerWorkManager(WorkContainer workContainer)
+        {
+            WorkContainer = workContainer;
+        }
 
         /// <summary>
         /// Registers the current client as available to work.  Will add the client
@@ -18,6 +23,7 @@ namespace WorkManager
         /// </summary>
         public override void StartWorking()
         {
+
             Console.WriteLine("Client connected.");
             var callback = GetCurrentWorkerCallback();
             callback.Active = true;
@@ -33,7 +39,7 @@ namespace WorkManager
             communicationObject.Closing += HandleDisconnectEvent;
         }
 
-        private static void HandleDisconnectEvent(object sender, EventArgs e)
+        private void HandleDisconnectEvent(object sender, EventArgs e)
         {
             var callback = (IWorker)sender;
             callback.Active = false;
@@ -61,24 +67,21 @@ namespace WorkManager
         {
             var workerCallback = GetCurrentWorkerCallback();
 
-            if (AssignedWork.ContainsKey(workerCallback))
+            if (WorkContainer.IsWorkAssigned(workerCallback))
             {
-                Guid assignedGuid;
-                AssignedWork.TryRemove(workerCallback, out assignedGuid);
+                WorkContainer.RemoveAssignedWork(workerCallback);
             }
 
             AvailableCallbacks.Add(workerCallback);
             workerCallback.IsWorking = false;
         }
 
-        private static void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)
+        private void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)
         {
-            if (callback.IsWorking && AssignedWork.ContainsKey(callback))
+            if (callback.IsWorking && WorkContainer.IsWorkAssigned(callback))
             {
-                Guid assignedGuid;
-                AssignedWork.TryRemove(callback, out assignedGuid);
-
-                UnassignedWork.GetOrAdd(assignedGuid, AllWork[assignedGuid]);
+                var assignedGuid = WorkContainer.RemoveAssignedWork(callback);
+                WorkContainer.SetUnassignedWork(assignedGuid);
             }
             callback.IsWorking = false;
         }

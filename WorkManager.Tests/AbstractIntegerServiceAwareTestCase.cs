@@ -17,10 +17,6 @@ namespace WorkManager.Tests
         [TestCleanup]
         public void TearDown()
         {
-            IntegerWorkManager.AllWork.Clear();
-            IntegerWorkManager.AssignedWork.Clear();
-            IntegerWorkManager.UnassignedWork.Clear();
-
             EmptyAvailableCallbacksObject();
             Mock.Reset();
         }

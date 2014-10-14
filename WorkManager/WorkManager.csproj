@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractWorkManager.cs" />
+    <Compile Include="ConcurrentContainers\WorkContainer.cs" />
     <Compile Include="DataContracts\IWorker.cs" />
     <Compile Include="DataContracts\WorkItem.cs" />
     <Compile Include="Exceptions\InvalidWorkItemException.cs" />

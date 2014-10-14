@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ServiceModel;
 using System.Threading;
+using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 
 namespace WorkManager
@@ -10,12 +11,14 @@ namespace WorkManager
 
     public class WorkDistributer : IDisposable
     {
+        public event DistributionCancelledHandler DistributionCancelled;
+
         private ServiceHost Host { get; set; }
 
         private CancellationTokenSource Cancellation { get; set; }
         public bool IsDistributingWork { get; set; }
 
-        public event DistributionCancelledHandler DistributionCancelled;
+        private WorkContainer WorkContainer { get; set; }
 
         protected virtual void OnDistributionCancelled()
         {
@@ -23,19 +26,15 @@ namespace WorkManager
             if (handler != null) handler(this, EventArgs.Empty);
         }
 
-        public WorkDistributer(ServiceHost host)
+        public WorkDistributer(ServiceHost host, WorkContainer workContainer)
         {
             Host = host;
+            WorkContainer = workContainer;
         }
 
         public void AddWork(List<int> workToDo)
         {
-            workToDo.ForEach((i) =>
-            {
-                var guid = Guid.NewGuid();
-                IntegerWorkManager.AllWork.TryAdd(guid, i);
-                IntegerWorkManager.UnassignedWork.TryAdd(guid, i);
-            });
+            workToDo.ForEach(work => WorkContainer.AddNewWork(work));
         }
 
         public void StartDistrubutingWork()
@@ -80,7 +79,7 @@ namespace WorkManager
             {
                 cancelToken.ThrowIfCancellationRequested();
 
-                if (IntegerWorkManager.UnassignedWork.Count == 0 || IntegerWorkManager.AvailableCallbacks.Count == 0)
+                if (!WorkContainer.IsAnyWorkUnassigned() || IntegerWorkManager.AvailableCallbacks.Count == 0)
                 {
                     //no point in doing anything if no workers are available, or if there is no work to be done
                     continue;
@@ -106,11 +105,10 @@ namespace WorkManager
 
         private WorkItem GetHighestPriorityWork()
         {
-            var workCollection = IntegerWorkManager.UnassignedWork;
             var largestItemGuid = GetLargestIntegerGuid();
-            int outValue;
-            workCollection.TryRemove(largestItemGuid, out outValue);
-            var workItem = new WorkItem(largestItemGuid, outValue);
+            var workValue = WorkContainer.RemoveUnassignedWork(largestItemGuid);
+
+            var workItem = new WorkItem(largestItemGuid, workValue);
             return workItem;
         }
 
@@ -118,13 +116,13 @@ namespace WorkManager
         {
             var guid = default(Guid);
             var largest = int.MinValue;
-            var workCollection = IntegerWorkManager.UnassignedWork;
-            foreach (var key in workCollection.Keys)
+            var workArray = WorkContainer.GetUnassignedWorkIterable();
+            foreach (var keyPair in workArray)
             {
-                if (workCollection[key] > largest)
+                if (keyPair.Value > largest)
                 {
-                    largest = workCollection[key];
-                    guid = key;
+                    largest = keyPair.Value;
+                    guid = keyPair.Key;
                 }
             }
             return guid;

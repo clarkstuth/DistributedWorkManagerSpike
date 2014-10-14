@@ -9,5 +9,6 @@ namespace WorkManager.DataContracts
 
         bool Active { get; set; }
         bool IsWorking { get; set; }
+
     }
 }

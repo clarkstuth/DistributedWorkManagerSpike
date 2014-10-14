@@ -1,4 +1,5 @@
 ﻿using System.ServiceModel;
+using WorkManager.ConcurrentContainers;
 
 namespace WorkManager.Factories
 {
@@ -6,8 +7,9 @@ namespace WorkManager.Factories
     {
         public WorkDistributer CreateWorkDistributer()
         {
+            var workContainer = new WorkContainer();
             var serviceHost = CreateWcfServiceHost();
-            var distributer = new WorkDistributer(serviceHost);
+            var distributer = new WorkDistributer(serviceHost, workContainer);
             return distributer;
         }
 
