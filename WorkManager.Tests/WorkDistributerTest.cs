@@ -114,7 +114,7 @@ namespace WorkManager.Tests
             var worker = Mock.Create<IWorker>();
             worker.Active = true;
             worker.IsWorking = false;
-            IntegerWorkManager.AvailableCallbacks.Add(worker);
+            CallbackContainer.AddAvailableCallback(worker);
 
             var called = false;
             Mock.Arrange(() => worker.DoWork(Arg.IsAny<WorkItem>())).DoInstead((WorkItem item) =>
@@ -142,7 +142,7 @@ namespace WorkManager.Tests
             var worker = Mock.Create<IWorker>();
             worker.Active = true;
             worker.IsWorking = false;
-            IntegerWorkManager.AvailableCallbacks.Add(worker);
+            CallbackContainer.AddAvailableCallback(worker);
 
             Mock.Arrange(() => worker.DoWork(Arg.IsAny<WorkItem>())).DoNothing();
 
@@ -153,7 +153,7 @@ namespace WorkManager.Tests
 
             Distributer.StartDistrubutingWork();
 
-            Assert.IsFalse(IntegerWorkManager.AvailableCallbacks.Any(callback => callback == worker));
+            Assert.IsFalse(CallbackContainer.IsCallbackAvailable(worker));
         }
 
         //TODO: MAKE ME NOT HATE MYSELF SO MUCH FOR THESE FEW TESTS
@@ -195,9 +195,9 @@ namespace WorkManager.Tests
                 sequence.Add(item.WorkToDo);
             });
 
-            IntegerWorkManager.AvailableCallbacks.Add(worker1);
-            IntegerWorkManager.AvailableCallbacks.Add(worker2);
-            IntegerWorkManager.AvailableCallbacks.Add(worker3);
+            CallbackContainer.AddAvailableCallback(worker1);
+            CallbackContainer.AddAvailableCallback(worker2);
+            CallbackContainer.AddAvailableCallback(worker3);
 
             Mock.Arrange(() => worker1.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
             Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);

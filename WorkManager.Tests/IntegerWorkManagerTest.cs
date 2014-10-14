@@ -65,7 +65,7 @@ namespace WorkManager.Tests
 
             Manager.StartWorking();
 
-            Assert.AreEqual(expectedCallbackCount, IntegerWorkManager.AvailableCallbacks.Count);
+            Assert.AreEqual(expectedCallbackCount, CallbackContainer.GetNumberAvailableCallbacks());
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace WorkManager.Tests
 
             Manager.WorkComplete(workItem);
 
-            Assert.IsTrue(IntegerWorkManager.AvailableCallbacks.Any((callback) => callback == WorkerCallback));
+            Assert.IsTrue(CallbackContainer.IsCallbackAvailable(WorkerCallback));
         }
 
     }

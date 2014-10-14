@@ -81,14 +81,14 @@ namespace WorkManager
             {
                 cancelToken.ThrowIfCancellationRequested();
 
-                if (!WorkContainer.IsAnyWorkUnassigned() || IntegerWorkManager.AvailableCallbacks.Count == 0)
+                if (!WorkContainer.IsAnyWorkUnassigned() || !CallbackContainer.AnyAvailableCallbacks())
                 {
                     //no point in doing anything if no workers are available, or if there is no work to be done
                     continue;
                 }
 
                 var workerSelectionTimeout = TimeSpan.FromSeconds(1);
-                var worker = GetAvailableCallback(workerSelectionTimeout);
+                var worker = CallbackContainer.GetAvailableCallbackWithinTimeout(workerSelectionTimeout);
 
                 if (worker != null && worker.Active && !worker.IsWorking)
                 {
@@ -96,13 +96,6 @@ namespace WorkManager
                     worker.DoWork(work);
                 }
             }
-        }
-
-        private IWorker GetAvailableCallback(TimeSpan timeout)
-        {
-            IWorker worker;
-            IntegerWorkManager.AvailableCallbacks.TryTake(out worker, timeout);
-            return worker;
         }
 
         private WorkItem GetHighestPriorityWork()

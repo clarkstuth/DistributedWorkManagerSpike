@@ -7,8 +7,10 @@ namespace WorkManager
 {
     public class IntegerWorkManager : AbstractWorkManager
     {
+/*
         public readonly static ConcurrentBag<IWorker> AllCallbacks = new ConcurrentBag<IWorker>();
         public readonly static BlockingCollection<IWorker> AvailableCallbacks = new BlockingCollection<IWorker>();
+*/
 
         private CallbackContainer CallbackContainer { get; set; }
         private WorkContainer WorkContainer { get; set; }
@@ -29,7 +31,7 @@ namespace WorkManager
             Console.WriteLine("Client connected.");
             var callback = GetCurrentWorkerCallback();
             callback.Active = true;
-            AvailableCallbacks.Add(callback);
+            CallbackContainer.AddAvailableCallback(callback);
 
             BindToCommunicationObjectCallbacks();
         }
@@ -74,7 +76,7 @@ namespace WorkManager
                 WorkContainer.RemoveAssignedWork(workerCallback);
             }
 
-            AvailableCallbacks.Add(workerCallback);
+            CallbackContainer.AddAvailableCallback(workerCallback);
             workerCallback.IsWorking = false;
         }
 

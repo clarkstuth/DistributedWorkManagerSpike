@@ -17,16 +17,7 @@ namespace WorkManager.Tests
         [TestCleanup]
         public void TearDown()
         {
-            EmptyAvailableCallbacksObject();
             Mock.Reset();
-        }
-
-        protected void EmptyAvailableCallbacksObject()
-        {
-            while (IntegerWorkManager.AvailableCallbacks.Count > 0)
-            {
-                IntegerWorkManager.AvailableCallbacks.Take();
-            }
         }
 
     }
