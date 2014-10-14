@@ -50,14 +50,6 @@ namespace WorkManager.Tests
         }
 
         [TestMethod]
-        public void StartWorkingShouldSetCallbackActiveToTrue()
-        {
-            Manager.StartWorking();
-
-            Assert.IsTrue(WorkerCallback.Active);
-        }
-
-        [TestMethod]
         public void StartWorkingShouldAddWorkerToAvailableCallbacksIfNotAlreadyWorking()
         {
             WorkerCallback.IsWorking = false;
@@ -82,15 +74,6 @@ namespace WorkManager.Tests
             Manager.StartWorking();
 
             Assert.IsTrue(CommunicationObject.IsEventHandlerClosingSet());
-        }
-
-        [TestMethod]
-        public void StopWorkingShouldSetCurrentWorkerToInactive()
-        {
-            Manager.StartWorking();
-            Manager.StopWorking();
-
-            Assert.IsFalse(WorkerCallback.Active);
         }
 
         [TestMethod]
@@ -119,26 +102,6 @@ namespace WorkManager.Tests
             Manager.WorkComplete(workItem);
 
             Assert.IsFalse(WorkerCallback.IsWorking);
-        }
-
-        [TestMethod]
-        public void CallbackClosedEventShouldSetCallbackActiveToFalse()
-        {
-            Manager.StartWorking();
-
-            CommunicationObject.TriggerClosedEvent(WorkerCallback);
-
-            Assert.IsFalse(WorkerCallback.Active);
-        }
-
-        [TestMethod]
-        public void CallbackClosingEventShouldSetCallbackActiveToFalse()
-        {
-            Manager.StartWorking();
-
-            CommunicationObject.TriggerClosingEvent(WorkerCallback);
-
-            Assert.IsFalse(WorkerCallback.Active);
         }
 
         [TestMethod]

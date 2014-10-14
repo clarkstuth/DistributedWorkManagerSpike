@@ -90,7 +90,7 @@ namespace WorkManager
                 var workerSelectionTimeout = TimeSpan.FromSeconds(1);
                 var worker = CallbackContainer.GetAvailableCallbackWithinTimeout(workerSelectionTimeout);
 
-                if (worker != null && worker.Active && !worker.IsWorking)
+                if (worker != null && !WorkContainer.IsWorkAssigned(worker))
                 {
                     var work = GetHighestPriorityWork();
                     worker.DoWork(work);

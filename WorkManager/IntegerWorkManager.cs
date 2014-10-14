@@ -30,7 +30,6 @@ namespace WorkManager
 
             Console.WriteLine("Client connected.");
             var callback = GetCurrentWorkerCallback();
-            callback.Active = true;
             CallbackContainer.AddAvailableCallback(callback);
 
             BindToCommunicationObjectCallbacks();
@@ -46,7 +45,6 @@ namespace WorkManager
         private void HandleDisconnectEvent(object sender, EventArgs e)
         {
             var callback = (IWorker)sender;
-            callback.Active = false;
 
             PutAssignedWorkBackIntoAvailableCollection(callback);
         }
@@ -58,7 +56,6 @@ namespace WorkManager
         public override void StopWorking()
         {
             var callback = GetCurrentWorkerCallback();
-            callback.Active = false;
 
             PutAssignedWorkBackIntoAvailableCollection(callback);
         }

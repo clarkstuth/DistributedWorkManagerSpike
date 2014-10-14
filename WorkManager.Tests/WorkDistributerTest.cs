@@ -112,7 +112,6 @@ namespace WorkManager.Tests
         {
             var items = new List<int> {1};
             var worker = Mock.Create<IWorker>();
-            worker.Active = true;
             worker.IsWorking = false;
             CallbackContainer.AddAvailableCallback(worker);
 
@@ -140,7 +139,6 @@ namespace WorkManager.Tests
         {
             var items = new List<int> {1};
             var worker = Mock.Create<IWorker>();
-            worker.Active = true;
             worker.IsWorking = false;
             CallbackContainer.AddAvailableCallback(worker);
 
@@ -164,15 +162,12 @@ namespace WorkManager.Tests
             var items = new List<int> {1, 2, 3};
 
             var worker1 = Mock.Create<IWorker>();
-            worker1.Active = true;
             worker1.IsWorking = false;
 
             var worker2 = Mock.Create<IWorker>();
-            worker2.Active = true;
             worker2.IsWorking = false;
 
             var worker3 = Mock.Create<IWorker>();
-            worker3.Active = true;
             worker3.IsWorking = false;
 
             bool oneSeen = false, twoSeen = false, threeSeen = false;
