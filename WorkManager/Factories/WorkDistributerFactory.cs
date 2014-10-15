@@ -1,5 +1,6 @@
 ﻿using System.ServiceModel;
 using WorkManager.ConcurrentContainers;
+using WorkManager.ServiceHosting;
 
 namespace WorkManager.Factories
 {
@@ -9,14 +10,11 @@ namespace WorkManager.Factories
         {
             var workContainer = new WorkContainer();
             var callbackContainer = new CallbackContainer();
-            var serviceHost = CreateWcfServiceHost();
+
+            var serviceHost = new IntegerServiceHost(callbackContainer, workContainer, typeof (IntegerWorkManager));
+
             var distributer = new WorkDistributer(serviceHost, workContainer, callbackContainer);
             return distributer;
-        }
-
-        private ServiceHost CreateWcfServiceHost()
-        {
-            return new ServiceHost(typeof(IntegerWorkManager));
         }
     }
 }
