@@ -73,6 +73,7 @@ namespace WorkManager
             }
 
             CallbackContainer.AddAvailableCallback(workerCallback);
+            WorkContainer.RemoveWork(workItem.WorkGuid);
         }
 
         private void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)

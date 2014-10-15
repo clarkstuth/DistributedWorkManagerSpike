@@ -96,6 +96,10 @@ namespace WorkManager.ConcurrentContainers
             return UnassignedWork[workGuid];
         }
 
-
+        public void RemoveWork(Guid workGuid)
+        {
+            int theValue;
+            AllWork.TryRemove(workGuid, out theValue);
+        }
     }
 }

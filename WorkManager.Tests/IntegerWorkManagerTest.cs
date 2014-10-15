@@ -128,12 +128,23 @@ namespace WorkManager.Tests
         {
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
-
             var workItem = new WorkItem {WorkGuid = guid, WorkToDo = work};
 
             Manager.WorkComplete(workItem);
 
             Assert.IsTrue(CallbackContainer.IsCallbackAvailable(WorkerCallback));
+        }
+
+        [TestMethod]
+        public void WorkCompleteShouldRemoveWorkFromAllWorkCollection()
+        {
+            var work = 2;
+            var guid = WorkContainer.AddNewWork(work);
+            var workItem = new WorkItem { WorkGuid = guid, WorkToDo = work };
+
+            Manager.WorkComplete(workItem);
+
+            Assert.IsFalse(WorkContainer.WorkValueExists(work));
         }
 
     }

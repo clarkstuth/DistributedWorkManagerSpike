@@ -40,6 +40,5 @@ namespace WorkManager.ConcurrentContainers
         {
             return AvailableCallbacks.Any(callback => callback == workerCallback);
         }
-
     }
 }
