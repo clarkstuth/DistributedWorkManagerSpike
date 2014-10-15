@@ -7,15 +7,9 @@ namespace WorkManager.DataContracts
     public class WorkItem
     {
         [DataMember(IsRequired = true)]
-        public readonly int WorkToDo;
+        public int WorkToDo { get; set; }
 
         [DataMember(IsRequired = true)]
-        public readonly Guid WorkGuid;
-
-        public WorkItem(Guid workGuid, int workToDo)
-        {
-            WorkGuid = workGuid;
-            WorkToDo = workToDo;
-        }
+        public Guid WorkGuid { get; set; }
     }
 }

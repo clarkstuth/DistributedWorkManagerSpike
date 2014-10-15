@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 

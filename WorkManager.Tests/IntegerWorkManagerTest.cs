@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.ServiceModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Telerik.JustMock;
@@ -80,7 +79,7 @@ namespace WorkManager.Tests
         {
             var guid = Guid.NewGuid();
             var work = 1;
-            var workItem = new WorkItem(guid, work);
+            var workItem = new WorkItem {WorkGuid = guid, WorkToDo = work};
             WorkContainer.SetAssignedWork(WorkerCallback, guid);
 
             Manager.WorkComplete(workItem);
@@ -130,7 +129,7 @@ namespace WorkManager.Tests
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
 
-            var workItem = new WorkItem(guid, work);
+            var workItem = new WorkItem {WorkGuid = guid, WorkToDo = work};
 
             Manager.WorkComplete(workItem);
 

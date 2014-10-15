@@ -17,7 +17,6 @@ namespace WorkManager.ConcurrentContainers
         public void AddAvailableCallback(IWorker callback)
         {
             AvailableCallbacks.Add(callback);
-            var callbackActive = false;
         }
 
         public bool AnyAvailableCallbacks()

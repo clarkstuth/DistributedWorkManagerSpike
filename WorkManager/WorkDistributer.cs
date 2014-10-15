@@ -103,7 +103,7 @@ namespace WorkManager
             var largestItemGuid = GetLargestIntegerGuid();
             var workValue = WorkContainer.RemoveUnassignedWork(largestItemGuid);
 
-            var workItem = new WorkItem(largestItemGuid, workValue);
+            var workItem = new WorkItem {WorkGuid = largestItemGuid, WorkToDo = workValue};
             return workItem;
         }
 
