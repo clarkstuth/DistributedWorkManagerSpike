@@ -93,7 +93,15 @@ namespace WorkManager
                 if (worker != null && !WorkContainer.IsWorkAssigned(worker))
                 {
                     var work = GetHighestPriorityWork();
-                    worker.DoWork(work);
+                    try
+                    {
+                        worker.DoWork(work);
+                    }
+                    catch (CommunicationObjectAbortedException e)
+                    {
+                        //worker disconnected.  Put work back and try this again.
+                        WorkContainer.SetUnassignedWork(work.WorkGuid);
+                    }
                 }
             }
         }

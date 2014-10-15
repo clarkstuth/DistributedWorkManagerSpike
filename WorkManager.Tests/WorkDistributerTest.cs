@@ -228,5 +228,31 @@ namespace WorkManager.Tests
             Mock.Assert(Host);
         }
 
+        [TestMethod]
+        public void IfCallbackDoWorkThrowsCommunicationObjectAbortedExceptionShouldTryAgain()
+        {
+            var items = new List<int> {7};
+            var worker1 = Mock.Create<IWorker>();
+            var worker2 = Mock.Create<IWorker>();
+
+            items.ForEach(i => WorkContainer.AddNewWork(i));
+            CallbackContainer.AddAvailableCallback(worker1);
+            CallbackContainer.AddAvailableCallback(worker2);
+
+            var called = false;
+
+            Mock.Arrange(() => worker1.DoWork(Arg.IsAny<WorkItem>())).Throws(new CommunicationObjectAbortedException()).MustBeCalled();
+            Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead((WorkItem item) => called = true);
+
+            Distributer.StartDistrubutingWork();
+            
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+
+            Distributer.StopDistributingWork();
+
+            Mock.Assert(worker1);
+            Assert.IsTrue(called);
+        }
+
     }
 }
