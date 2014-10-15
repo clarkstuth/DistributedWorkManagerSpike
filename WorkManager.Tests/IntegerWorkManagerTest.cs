@@ -52,7 +52,6 @@ namespace WorkManager.Tests
         [TestMethod]
         public void StartWorkingShouldAddWorkerToAvailableCallbacksIfNotAlreadyWorking()
         {
-            WorkerCallback.IsWorking = false;
             var expectedCallbackCount = 1;
 
             Manager.StartWorking();
@@ -90,24 +89,8 @@ namespace WorkManager.Tests
         }
 
         [TestMethod]
-        public void WorkCompleteShouldSetCallbackToNotWorking()
-        {
-            WorkerCallback.IsWorking = true;
-            var guid = Guid.NewGuid();
-            var value = 1;
-            var workItem = new WorkItem(guid, value);
-            WorkContainer.SetAssignedWork(WorkerCallback, guid);
-
-            Manager.StartWorking();
-            Manager.WorkComplete(workItem);
-
-            Assert.IsFalse(WorkerCallback.IsWorking);
-        }
-
-        [TestMethod]
         public void CallbackClosedEventShouldPutWorkBackIntoAvailableWorkIfAssigned()
         {
-            WorkerCallback.IsWorking = true;
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
 
@@ -120,8 +103,6 @@ namespace WorkManager.Tests
         [TestMethod]
         public void CallbackClosingEventShouldPutWorkBackIntoAvailableWorkIfAssigned()
         {
-            WorkerCallback.IsWorking = true;
-
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
 
@@ -134,8 +115,6 @@ namespace WorkManager.Tests
         [TestMethod]
         public void StopWorkingShouldPutAssignedWorkBackIntoAvailableWorkCollection()
         {
-            WorkerCallback.IsWorking = true;
-
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
 
@@ -148,8 +127,6 @@ namespace WorkManager.Tests
         [TestMethod]
         public void WorkCompleteShouldAddTheCurrentCallbackBackIntoTheCollectionOfAvailableCallbacks()
         {
-            WorkerCallback.IsWorking = true;
-
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
 

@@ -74,17 +74,15 @@ namespace WorkManager
             }
 
             CallbackContainer.AddAvailableCallback(workerCallback);
-            workerCallback.IsWorking = false;
         }
 
         private void PutAssignedWorkBackIntoAvailableCollection(IWorker callback)
         {
-            if (callback.IsWorking && WorkContainer.IsWorkAssigned(callback))
+            if (WorkContainer.IsWorkAssigned(callback))
             {
                 var assignedGuid = WorkContainer.RemoveAssignedWork(callback);
                 WorkContainer.SetUnassignedWork(assignedGuid);
             }
-            callback.IsWorking = false;
         }
 
     }

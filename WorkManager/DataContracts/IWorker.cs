@@ -6,9 +6,5 @@ namespace WorkManager.DataContracts
     {
         [OperationContract(IsOneWay = true)]
         void DoWork(WorkItem workItem);
-
-        /*bool Active { get; set; }*/
-        bool IsWorking { get; set; }
-
     }
 }
