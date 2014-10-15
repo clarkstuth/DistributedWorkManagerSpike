@@ -235,7 +235,7 @@ namespace WorkManager.Tests
             var worker1 = Mock.Create<IWorker>();
             var worker2 = Mock.Create<IWorker>();
 
-            items.ForEach(i => WorkContainer.AddNewWork(i));
+            Distributer.AddWork(items);
             CallbackContainer.AddAvailableCallback(worker1);
             CallbackContainer.AddAvailableCallback(worker2);
 
