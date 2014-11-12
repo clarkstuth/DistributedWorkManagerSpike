@@ -63,6 +63,7 @@
     <Compile Include="ServiceHosting\IntegerInstanceProvider.cs" />
     <Compile Include="ServiceHosting\IntegerServiceHost.cs" />
     <Compile Include="ServiceHosting\IntegerServiceHostFactory.cs" />
+    <Compile Include="ServiceHosting\IWorkDistributerServiceHost.cs" />
     <Compile Include="WorkDistributer.cs" />
   </ItemGroup>
   <ItemGroup>

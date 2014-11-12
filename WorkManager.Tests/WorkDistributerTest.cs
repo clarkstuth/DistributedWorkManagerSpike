@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using System.ServiceModel.Description;
 using System.Threading;
+using Microsoft.QualityTools.Testing.Fakes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Telerik.JustMock;
 using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
+using WorkManager.DataContracts.Fakes;
+using WorkManager.ServiceHosting;
+using WorkManager.ServiceHosting.Fakes;
 
 namespace WorkManager.Tests
 {
     [TestClass]
     public class WorkDistributerTest : AbstractIntegerServiceAwareTestCase
     {
-        ServiceHost Host { get; set; }
+        IWorkDistributerServiceHost Host { get; set; }
         WorkContainer WorkContainer { get; set; }
         CallbackContainer CallbackContainer { get; set; }
         WorkDistributer Distributer { get; set; }
@@ -21,10 +25,18 @@ namespace WorkManager.Tests
         public void SetUp()
         {
             base.SetUp();
-            Host = Mock.Create<ServiceHost>();
+
             WorkContainer = new WorkContainer();
             CallbackContainer = new CallbackContainer();
-            Distributer = new WorkDistributer(Host, WorkContainer, CallbackContainer);
+
+            var uris = new[] {new Uri("http://localhost:443")};
+
+            Host = new StubIWorkDistributerServiceHost()
+            {
+                
+            };
+
+            InitializeDistributer();
         }
 
         [TestCleanup]
@@ -34,7 +46,13 @@ namespace WorkManager.Tests
             CallbackContainer = null;
             WorkContainer = null;
             Host = null;
+
             base.TearDown();
+        }
+
+        private void InitializeDistributer()
+        {
+            Distributer = new WorkDistributer(Host, WorkContainer, CallbackContainer);
         }
 
         [TestMethod]
@@ -91,12 +109,10 @@ namespace WorkManager.Tests
         {
             var called = false;
 
-            var handler = Mock.Create<DistributionCancelledHandler>();
-            Mock.Arrange(() => handler.Invoke(Arg.IsAny<object>(), Arg.IsAny<EventArgs>())).DoInstead((object obj, EventArgs eventArgs) =>
+            Distributer.DistributionCancelled += (sender, e) =>
             {
                 called = true;
-            });
-            Distributer.DistributionCancelled += handler;
+            };
 
             Distributer.StartDistrubutingWork();
             Distributer.StopDistributingWork();
@@ -110,17 +126,17 @@ namespace WorkManager.Tests
         public void StartDistributingWorkWithOneWorkerAndOneItemShouldPassItemToWorker()
         {
             var items = new List<int> {1};
-            var worker = Mock.Create<IWorker>();
+            var worker = new DataContracts.Fakes.StubIWorker();
             CallbackContainer.AddAvailableCallback(worker);
 
             var called = false;
-            Mock.Arrange(() => worker.DoWork(Arg.IsAny<WorkItem>())).DoInstead((WorkItem item) =>
+            worker.DoWorkWorkItem = (item) =>
             {
                 if (item.WorkToDo == 1)
                 {
                     called = true;
                 }
-            });
+            };
 
             Distributer.AddWork(items);
             Distributer.StartDistrubutingWork();
@@ -136,10 +152,10 @@ namespace WorkManager.Tests
         public void StartDistributingWorkWithValidWorkToBeDoneShouldRemoveWorkerFromListOfAvailableWorkers()
         {
             var items = new List<int> {1};
-            var worker = Mock.Create<IWorker>();
+            var worker = new DataContracts.Fakes.StubIWorker();
             CallbackContainer.AddAvailableCallback(worker);
 
-            Mock.Arrange(() => worker.DoWork(Arg.IsAny<WorkItem>())).DoNothing();
+            worker.DoWorkWorkItem = (item) => { };
 
             Distributer.AddWork(items);
             Distributer.StartDistrubutingWork();
@@ -158,14 +174,14 @@ namespace WorkManager.Tests
             //Arrange
             var items = new List<int> {1, 2, 3};
 
-            var worker1 = Mock.Create<IWorker>();
-            var worker2 = Mock.Create<IWorker>();
-            var worker3 = Mock.Create<IWorker>();
+            var worker1 = new DataContracts.Fakes.StubIWorker();
+            var worker2 = new DataContracts.Fakes.StubIWorker();
+            var worker3 = new DataContracts.Fakes.StubIWorker();
 
             bool oneSeen = false, twoSeen = false, threeSeen = false;
             var sequence = new List<int>();
 
-            var action = new Action<WorkItem>((item) =>
+            var action = new FakesDelegates.Action<WorkItem>((item) =>
             {
                 switch (item.WorkToDo)
                 {
@@ -186,9 +202,9 @@ namespace WorkManager.Tests
             CallbackContainer.AddAvailableCallback(worker2);
             CallbackContainer.AddAvailableCallback(worker3);
 
-            Mock.Arrange(() => worker1.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
-            Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
-            Mock.Arrange(() => worker3.DoWork(Arg.IsAny<WorkItem>())).DoInstead(action);
+            worker1.DoWorkWorkItem = action;
+            worker2.DoWorkWorkItem = action;
+            worker3.DoWorkWorkItem = action;
 
             //Act
             Distributer.AddWork(items);
@@ -210,30 +226,40 @@ namespace WorkManager.Tests
         [TestMethod]
         public void StartDistributingShouldSetServiceHostToOpen()
         {
-            Mock.Arrange(() => Host.Open()).DoNothing().MustBeCalled();
+            var called = false;
+
+            Host.Opened += (sender, args) =>
+            {
+                called = true;
+            };
 
             Distributer.StartDistrubutingWork();
 
-            Mock.Assert(Host);
+            Assert.IsTrue(called);
         }
 
         [TestMethod]
         public void StopDistributingShouldSetServiceHostToClosed()
         {
-            Mock.Arrange(() => Host.Close()).DoNothing().MustBeCalled();
+            var called = false;
 
+            Host.Closed += (sender, args) =>
+            {
+                called = true;
+            };
+            
             Distributer.StartDistrubutingWork();
             Distributer.StopDistributingWork();
 
-            Mock.Assert(Host);
+            Assert.IsTrue(called);
         }
 
         [TestMethod]
         public void IfCallbackDoWorkThrowsCommunicationObjectAbortedExceptionShouldTryAgain()
         {
             var items = new List<int> {7};
-            var worker1 = Mock.Create<IWorker>();
-            var worker2 = Mock.Create<IWorker>();
+            var worker1 = new StubIWorker();
+            var worker2 = new StubIWorker();
 
             Distributer.AddWork(items);
             CallbackContainer.AddAvailableCallback(worker1);
@@ -241,8 +267,9 @@ namespace WorkManager.Tests
 
             var called = false;
 
-            Mock.Arrange(() => worker1.DoWork(Arg.IsAny<WorkItem>())).Throws(new CommunicationObjectAbortedException()).MustBeCalled();
-            Mock.Arrange(() => worker2.DoWork(Arg.IsAny<WorkItem>())).DoInstead((WorkItem item) => called = true);
+            worker1.DoWorkWorkItem = (workItem) => { throw new CommunicationObjectAbortedException(); };
+            worker2.DoWorkWorkItem = (workItem) => { called = true; };
+
 
             Distributer.StartDistrubutingWork();
             
@@ -250,7 +277,6 @@ namespace WorkManager.Tests
 
             Distributer.StopDistributingWork();
 
-            Mock.Assert(worker1);
             Assert.IsTrue(called);
         }
 

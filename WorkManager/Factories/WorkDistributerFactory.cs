@@ -1,5 +1,4 @@
-﻿using System.ServiceModel;
-using WorkManager.ConcurrentContainers;
+﻿using WorkManager.ConcurrentContainers;
 using WorkManager.ServiceHosting;
 
 namespace WorkManager.Factories

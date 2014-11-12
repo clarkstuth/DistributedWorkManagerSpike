@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ServiceModel;
+using System.ServiceModel.Fakes;
+using Microsoft.QualityTools.Testing.Fakes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Telerik.JustMock;
 using WorkManager.ConcurrentContainers;
 using WorkManager.DataContracts;
 
@@ -22,12 +23,16 @@ namespace WorkManager.Tests
         public void SetUp()
         {
             base.SetUp();
-            Context = Mock.Create<OperationContext>();
+
+            ShimsContext.Create();
+
+            WorkerCallback = new DataContracts.Fakes.StubIWorker();
             CommunicationObject = new FakeCommunicationObject();
 
-            WorkerCallback = Mock.Create<IWorker>();
-            Mock.Arrange(() => Context.GetCallbackChannel<ICommunicationObject>()).Returns(CommunicationObject);
-            Mock.Arrange(() => Context.GetCallbackChannel<IWorker>()).Returns(WorkerCallback);
+            Context = new System.ServiceModel.Fakes.ShimOperationContext();
+
+            System.ServiceModel.Fakes.ShimOperationContext.AllInstances.GetCallbackChannelOf1<ICommunicationObject>((context) => { return CommunicationObject; });
+            System.ServiceModel.Fakes.ShimOperationContext.AllInstances.GetCallbackChannelOf1<IWorker>((context) => { return WorkerCallback; });
 
             WorkContainer = new WorkContainer();
             CallbackContainer = new CallbackContainer();
@@ -44,7 +49,9 @@ namespace WorkManager.Tests
             WorkContainer = null;
             CallbackContainer = null;
             CommunicationObject = null;
-            Context = null;
+
+            ShimsContext.Reset();
+
             base.TearDown();
         }
 
@@ -79,7 +86,7 @@ namespace WorkManager.Tests
         {
             var guid = Guid.NewGuid();
             var work = 1;
-            var workItem = new WorkItem {WorkGuid = guid, WorkToDo = work};
+            var workItem = new WorkItem { WorkGuid = guid, WorkToDo = work };
             WorkContainer.SetAssignedWork(WorkerCallback, guid);
 
             Manager.WorkComplete(workItem);
@@ -128,7 +135,7 @@ namespace WorkManager.Tests
         {
             var work = 2;
             var guid = WorkContainer.AddNewWork(work);
-            var workItem = new WorkItem {WorkGuid = guid, WorkToDo = work};
+            var workItem = new WorkItem { WorkGuid = guid, WorkToDo = work };
 
             Manager.WorkComplete(workItem);
 
